@@ -7,10 +7,8 @@ import matplotlib.pyplot as plt
 def show_histograms(filenames):
     for id in range(0,15):
         title = str(filenames[id][-21:-11])
-        with rio.open(filenames[id],'r',title=title) as src:
-            #show(src)
-            #print(src.meta)
-            
+        with rio.open(filenames[id],'r') as src:
+
             fig, axhist = plt.subplots(1, 1, figsize=(20, 20))
             show_hist(src, ax=axhist, bins=100, lw=0.0, stacked=False, 
                       alpha=0.3, histtype='stepfilled', density=True)
@@ -27,4 +25,3 @@ def show_backscatter(filenames):
         with rio.open(filenames[id],'r') as src:
             show(src,title=title, transform=src.transform)
             
-         

@@ -36,7 +36,7 @@ def stack_images(image_names, input_name='radar_time_series', output_name = 'rad
                 with rio.open(input_name+'/'+ layer) as src1:
                     dst.write_band(id, src1.read(1))
             #also use band names
-            dst.descriptions = tuple([file_list_one_date[0], file_list_one_date[1]])
+            #dst.descriptions = tuple([file_list_one_date[0], file_list_one_date[1]])
         list_of_stacked_images.append(output_name+'/'+str(date)+'_stack.tiff')
         
     #stacked_rasters = [rio.open(filename) for filename in list_of_stacked_images]
@@ -61,7 +61,6 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
         vvvh_ratio = vvvh_ratio.astype(rio.float32)
         
         #close datareader: necessary to prevent errors when appending the new band to the files
-        show(raster_stack)
         raster_stack.close()
         
         with rio.open(stack, 'w', **meta) as dst:
@@ -69,7 +68,7 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
             dst.write_band(1,vv.astype(rio.float32))
             dst.write_band(2,vh.astype(rio.float32))
             dst.write_band(3,vvvh_ratio)
-            dst.descriptions = tuple(['VV','VH','VV/VH ratio'])
+            dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
     return(stacked_names)
 
 ## credit: https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-calculations.html

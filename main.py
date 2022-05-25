@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 #############
 ## MAIN
 #############
@@ -28,6 +27,8 @@ from load_data_from_zip_folders import load_data
 from load_images import load_images
 from stack_images import stack_images
 from stack_images import add_ratio
+from visualize import show_backscatter
+from visualize import show_histograms
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
@@ -38,7 +39,7 @@ list_of_images = load_data(dir_name=input_folder, dest_name = images_folder)
 #This function returns a list of image names and stores all images with those names in a folder
 
 ## Load images from the images_folder as rasterio dataset readers
-rasters = load_images(list_of_images, dest_name = images_folder)
+#rasters = load_images(list_of_images, dest_name = images_folder)
 
 ## Optionally: load a local subset of a global DEM and global water bodies dataset to aid in the classification
 
@@ -48,7 +49,7 @@ rasters = load_images(list_of_images, dest_name = images_folder)
 ## If needed: speckle filter ... 
 
 ## Create for each date in the time series a stack of VV, VH and VV/VH ratio images
-stacked_rasters_names = stack_images(list_of_images, rasters, input_name=images_folder, output_name=stacked_images_folder)
+stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 stacked_rasters_names = add_ratio(stacked_rasters_names, folder='stacked_images_folder')
 
 ## Classify each pixel for each image as open water, flooded area or dry area
@@ -57,6 +58,9 @@ stacked_rasters_names = add_ratio(stacked_rasters_names, folder='stacked_images_
 ## Return a time series of classified maps
 
 ## STEP 3: Visualize Results
+#Show some simple histograms:
+show_histograms(stacked_rasters_names)
+show_backscatter(stacked_rasters_names)
 ## Create a flood frequency map based on the time series
 ## Create nice visualization
 ## Optionally: make animated map that shows classification for each time step in order

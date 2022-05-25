@@ -6,14 +6,20 @@ Created on Wed May 25 11:52:31 2022
 """
 
 import rasterio as rs
+from rasterio.plot import show
+from rasterio import mask
 import numpy as np
 from osgeo import gdal, ogr
 import matplotlib.pyplot as plt
 import os
 import seaborn as sns
+import geopandas as gpd
+
+# open the two rasters 
+dataset = rs.open("./downloads/W080N20_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif", driver="GTiff")
+map1 = dataset.read()
 
 
-# Open dataset
-dataset = rs.open(r'C:\Users\markb\Downloads\W080N20_PROBAV_LC100_global_v3.0.1_2019-nrt_Discrete-Classification-map_EPSG-4326.tif')
 
-band1 = dataset.read(1)
+
+

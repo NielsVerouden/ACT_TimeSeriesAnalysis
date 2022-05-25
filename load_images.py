@@ -6,6 +6,9 @@ import os
 ##the function returns a list containing all rasterio dataset readers
 ##dest_name is the folder in which images are stored
 
+
+### not used ###
+
 def load_images(image_names, dest_name='radar_time_series'):
     if not os.path.exists(dest_name): os.makedirs(dest_name)
 

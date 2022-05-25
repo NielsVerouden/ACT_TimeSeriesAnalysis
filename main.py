@@ -29,6 +29,7 @@ from stack_images import stack_images
 from stack_images import add_ratio
 from visualize import show_backscatter
 from visualize import show_histograms
+from speckle_filter import apply_lee_filter
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
@@ -47,10 +48,10 @@ list_of_images = load_data(dir_name=input_folder, dest_name = images_folder)
 
 ## STEP 2: Process data 
 ## If needed: speckle filter ... 
-
+list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
 ## Create for each date in the time series a stack of VV, VH and VV/VH ratio images
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
-stacked_rasters_names = add_ratio(stacked_rasters_names, folder='stacked_images_folder')
+stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_folder)
 
 ## Classify each pixel for each image as open water, flooded area or dry area
 ## Optionally: use global water bodies dataset to mask open water

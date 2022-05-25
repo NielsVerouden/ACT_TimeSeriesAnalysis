@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 #############
 ## MAIN
 #############
@@ -70,3 +71,10 @@ stacked_rasters_names = add_ratio(stacked_rasters_names, folder='stacked_images_
 
 
 
+=======
+#####
+## MAIN
+#############
+
+from load_data_from_zip_folders import load_data
+>>>>>>> 1087273cc43ec79ead8e9ada353df648d270ecb3

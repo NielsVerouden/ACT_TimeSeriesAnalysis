@@ -7,7 +7,7 @@ import numpy as np
 ## where each dataset reader contains three bands: VV, VH and VV/VH ratio
 ##dest_name is the folder in which images are stored
 
-def stack_images(image_names, images, input_name='radar_time_series', output_name = 'radar_time_series_stacked'):
+def stack_images(image_names, input_name='radar_time_series', output_name = 'radar_time_series_stacked'):
     if not os.path.exists(output_name): os.makedirs(output_name)
     list_of_stacked_images = []
     for name in image_names:
@@ -46,6 +46,7 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
     for stack in stacked_names:
         
         raster_stack = rio.open(stack)
+        
         meta = raster_stack.meta
         meta.update(count=3)
         vv = raster_stack.read(1)
@@ -60,11 +61,15 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
         vvvh_ratio = vvvh_ratio.astype(rio.float32)
         
         #close datareader: necessary to prevent errors when appending the new band to the files
+        show(raster_stack)
         raster_stack.close()
         
         with rio.open(stack, 'w', **meta) as dst:
             #append vv/vh ratio to the band
+            dst.write_band(1,vv.astype(rio.float32))
+            dst.write_band(2,vh.astype(rio.float32))
             dst.write_band(3,vvvh_ratio)
+            dst.descriptions = tuple(['VV','VH','VV/VH ratio'])
     return(stacked_names)
 
 ## credit: https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-calculations.html

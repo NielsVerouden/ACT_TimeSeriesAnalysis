@@ -25,10 +25,11 @@
 
 from load_data_from_zip_folders import load_data
 from load_images import load_images
+from stack_images import stack_images
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
-
+stacked_images_folder = 'radar_time_series_stacked'
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 list_of_images = load_data(dir_name=input_folder, dest_name = images_folder)
@@ -42,8 +43,10 @@ rasters = load_images(list_of_images, dest_name = images_folder)
 
 
 ## STEP 2: Process data 
-## If needed: speckle filter
+## If needed: speckle filter ... 
+
 ## Create for each date in the time series a stack of VV, VH and VV/VH ratio images
+stacked_rasters = stack_images(list_of_images, rasters, input_name=images_folder, output_name=stacked_images_folder)
 ## Classify each pixel for each image as open water, flooded area or dry area
 ## Optionally: use global water bodies dataset to mask open water
 ## OPtionally: use global DEM to aid in the classification

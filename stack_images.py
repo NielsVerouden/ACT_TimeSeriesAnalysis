@@ -20,23 +20,14 @@ def stack_images(image_names, images, input_name='radar_time_series', output_nam
                 file_list_one_date.append(sec_name)
         
         #Now we have a list with two elements: filenames of tiff files of the same date
-        '''
-        #Let's calculate the vv/vh ratio
-        vv = rio.open(input_name+'/'+ file_list_one_date[0]).read(1)
-        vh = rio.open(input_name+'/'+ file_list_one_date[1]).read(1)
-        np.seterr(divide='ignore', invalid='ignore')
-        vvvh_ratio = np.empty(vv.shape, dtype=rio.float32)
-        check = np.logical_or ( vv > 0, vh > 0 )
-        
-        #VV/VH ratio is calculated as VV-VH, since our data is measured in decibels
-        vvvh_ratio = np.where ( check,  (vv-vh), -999 )
-        '''
-        #######
-        #Let's create a stack for each date containing the two tiff files and a third calculated raster
+   
+        #Let's create a stack for each date containing the two tiff files 
         # Read metadata of first file of each date
+        # Metadata is to be used later when writing the files
         with rio.open(input_name+'/'+ file_list_one_date[0]) as src0:
             meta = src0.meta
         # Update meta to reflect the number of layers
+        # If it is not updated an error is raised
         meta.update(count = len(file_list_one_date))
         
         # Read each layer and write it to stack
@@ -44,6 +35,7 @@ def stack_images(image_names, images, input_name='radar_time_series', output_nam
             for id, layer in enumerate(file_list_one_date, start=1):
                 with rio.open(input_name+'/'+ layer) as src1:
                     dst.write_band(id, src1.read(1))
+            #also use band names
             dst.descriptions = tuple([file_list_one_date[0], file_list_one_date[1]])
         list_of_stacked_images.append(output_name+'/'+str(date)+'_stack.tiff')
         
@@ -58,7 +50,8 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
         meta.update(count=3)
         vv = raster_stack.read(1)
         vh = raster_stack.read(2)
-        np.seterr(divide='ignore', invalid='ignore')
+        
+        #np.seterr(divide='ignore', invalid='ignore')
         vvvh_ratio = np.empty(raster_stack.shape, dtype=rio.float32)
         check = np.logical_or ( vv > 0, vh > 0 )
         
@@ -66,26 +59,12 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
         vvvh_ratio = np.where ( check,  (vv-vh), -999 )
         vvvh_ratio = vvvh_ratio.astype(rio.float32)
         
-        #vvvh_ratio_rst.meta = raster_stack.meta
-        #stack.meta.update(count=3)
-    #print(vvvh_ratio.astype(raster.width)
+        #close datareader: necessary to prevent errors when appending the new band to the files
         raster_stack.close()
+        
         with rio.open(stack, 'w', **meta) as dst:
-            #meta = dst.meta
+            #append vv/vh ratio to the band
             dst.write_band(3,vvvh_ratio)
     return(stacked_names)
 
 ## credit: https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-calculations.html
-
-
-#stacked_rasters, ratio = add_ratio(stacked_rasters_names, stacked_rasters, folder='stacked_images_folder')
-'''
-with rio.open('radar_time_series_stacked/2022-01-25_stack.tiff','r') as src0:
-    meta = src0.meta 
-    
-with rio.open("test.tiff",'w',**meta) as dst:
-    dst.write(ratio,3)
-
-with rio.open("test.tiff",'r') as dst:
-    print(dst.meta)
-''' 

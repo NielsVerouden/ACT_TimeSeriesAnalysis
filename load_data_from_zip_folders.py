@@ -2,13 +2,8 @@
 ## LOAD IMAGES FROM ZIP FILE
 ############
 
-import rasterio as rio
-from rasterio.plot import show
+
 import os
-import datetime 
-import numpy as np
-import matplotlib.pyplot as plt
-from osgeo import gdal
 from zipfile import ZipFile
 
 def load_data(dir_name='sentinelhub_downloads', dest_name = 'radar_time_series'):
@@ -21,7 +16,7 @@ def load_data(dir_name='sentinelhub_downloads', dest_name = 'radar_time_series')
     #Unzip images to a new folder
     for item in os.listdir(dir_name): # loop through items in dir
         if item.endswith(extension): # check for ".zip" extension
-            file_name =  dir_name + "/" + item  # get full path of files
+            file_name =  os.path.join(dir_name, item)  # get full path of files
             zip_ref = ZipFile(file_name) # create zipfile object
             zipinfos=zip_ref.infolist()
             for zipinfo in zipinfos:

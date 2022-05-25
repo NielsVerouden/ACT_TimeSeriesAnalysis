@@ -61,20 +61,3 @@ stacked_rasters_names = add_ratio(stacked_rasters_names, folder='stacked_images_
 ## Create nice visualization
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time
-
-
-
-
-
-
-
-
-
-
-=======
-#####
-## MAIN
-#############
-
-from load_data_from_zip_folders import load_data
->>>>>>> 1087273cc43ec79ead8e9ada353df648d270ecb3

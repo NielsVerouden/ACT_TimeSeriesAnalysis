@@ -5,9 +5,10 @@ import matplotlib.pyplot as plt
 
 
 def show_histograms(filenames):
-    for id in range(0,15):
-        title = str(filenames[id][-21:-11])
-        with rio.open(filenames[id],'r') as src:
+    filenames_sorted = sorted(filenames)
+    for id in range(0,len(filenames_sorted)):
+        title = str(filenames_sorted[id][-21:-11])
+        with rio.open(filenames_sorted[id],'r') as src:
 
             fig, axhist = plt.subplots(1, 1, figsize=(20, 20))
             show_hist(src, ax=axhist, bins=100, lw=0.0, stacked=False, 
@@ -20,8 +21,15 @@ def show_histograms(filenames):
             #optional: add code to save histograms in a folder
 
 def show_backscatter(filenames):
-    for id in range(0,15):
-        title = str(filenames[id][-21:-11])
-        with rio.open(filenames[id],'r') as src:
+    filenames_sorted = sorted(filenames)
+    for id in range(0,len(filenames_sorted)):
+        title = str(filenames_sorted[id][-21:-11]) #select date as title
+        with rio.open(filenames_sorted[id],'r') as src:
             show(src,title=title, transform=src.transform)
-            
+         
+"""           
+for id in range(0,len(stacked_rasters_names)):
+    title = str(stacked_rasters_names[id][-21:-11]) #select date as title
+    with rio.open(stacked_rasters_names[id],'r') as src:
+        show(src,title=title, transform=src.transform)
+"""

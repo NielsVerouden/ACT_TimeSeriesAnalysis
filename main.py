@@ -24,7 +24,7 @@
 ## current working directory.
 
 from load_data_from_zip_folders import load_data
-from load_images import load_images
+#from load_images import load_images
 from stack_images import stack_images
 from stack_images import add_ratio
 from visualize import show_backscatter

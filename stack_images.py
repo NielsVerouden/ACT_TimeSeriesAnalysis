@@ -40,6 +40,7 @@ def stack_images(image_names, input_name='radar_time_series', output_name = 'rad
         list_of_stacked_images.append(output_name+'/'+str(date)+'_stack.tiff')
         
     #stacked_rasters = [rio.open(filename) for filename in list_of_stacked_images]
+    list_of_stacked_images = list(set(list_of_stacked_images))
     return(list_of_stacked_images)             
 
 def add_ratio(stacked_names, folder='radar_time_series_stacked'):

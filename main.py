@@ -30,10 +30,13 @@ from stack_images import add_ratio
 from visualize import show_backscatter
 from visualize import show_histograms
 from speckle_filter import apply_lee_filter
+from load_training_data import loadTrainingData
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
+training_folder = "TrainingData"
+
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 list_of_images = load_data(dir_name=input_folder, dest_name = images_folder)
@@ -53,6 +56,10 @@ list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, si
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_folder)
 
+
+##STEP 3: Load training data and train a supervised classification model
+#Check load_training_data.py to check how the training folder should be structured
+X, y = loadTrainingData(training_folder)
 ## Classify each pixel for each image as open water, flooded area or dry area
 ## Optionally: use global water bodies dataset to mask open water
 ## OPtionally: use global DEM to aid in the classification

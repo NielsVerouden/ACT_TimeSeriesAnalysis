@@ -31,6 +31,7 @@ from visualize import show_backscatter
 from visualize import show_histograms
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
+from train_model import GaussianNaiveBayes
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
@@ -59,7 +60,10 @@ stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_f
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
-X, y = loadTrainingData(training_folder)
+X, y, training_polys = loadTrainingData(training_folder)
+
+#Train a Gaussian Naive Bayes model
+model = GaussianNaiveBayes(X,y)    
 ## Classify each pixel for each image as open water, flooded area or dry area
 ## Optionally: use global water bodies dataset to mask open water
 ## OPtionally: use global DEM to aid in the classification

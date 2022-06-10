@@ -84,7 +84,7 @@ def loadTrainingData(training_folder):
     #X has all pixel values of the 3 bands
     #y has the labels per pixels
     #These arrays can later be used to train machine or deep learning models
-    return(X,y)
+    return(X,y,polys)
 
 """
 #Helper function:
@@ -93,8 +93,5 @@ def str_class_to_int(class_array):
     class_array[class_array == np.unique(polys["Label"])[0]] = 1
     class_array[class_array == np.unique(polys["Label"])[0]] = 2
     return(class_array.astype(int))
-
-#Train a GaussianNaiveBayes Classifier (just for trying)
-gnb = GaussianNB()
-gnb.fit(X, y)
 """
+#credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html 

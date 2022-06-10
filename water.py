@@ -5,38 +5,22 @@ import pandas as pd
 
 
 # Open dataset
-water_data = rasterio.open(r'data/really_small_area/really_small.tif')
+test = rasterio.open(r'data/really_small_area/really_small.tif')
 
 whole = rasterio.open(r'data/occurrence_80W_20Nv1_3_2020.tif')
 
 # PLot data
-plt.imshow(water_data.read(1), cmap='pink')
+plt.imshow(test.read(1), cmap='pink')
 
 # Create an array
-water_data_read = water_data.read(1)
+test_arr = test.read(1)
 
 # PLot the water data
-plt.imshow(water_data_read)
+plt.imshow(test_arr)
 
-water = water_data_read
-
-# PLot the threshold wherin the water bodies are different from the land
-plt.imshow(water, cmap='pink')
-
-# Create dataframe
-water = pd.DataFrame(water_data_read)
-
-# Mask values lower than 1
-water = water.mask(water < 1, None)
-
-# PLot the water bodies
-plt.imshow(water)
-
-# Convert to array again
-water = water.to_numpy()
 
 # Create metadata about the file to save it
-metadata = water_data.profile
+metadata = test.profile
 
 
 metadata.update(
@@ -47,23 +31,29 @@ metadata.update(
 # Set the land values to None
 metadata['nodata'] = None
 
-water = water.mask(water > water.quantile(0))
+# Create only 0 and 1 values
+def create_mask (water_data): 
+    for i in range(0,len(water_data)):
+        for j in range(0, len(water_data)):
+            if water_data[i][j] < 1:
+                water_data[i][j] = 0
+            else:
+                water_data[i][j] = 1
+    return(water_data)
 
-
-
-    
-plt.imshow(water_data_read)
-
-for i in range(0,11):
-    for j in range(0,10):
-        if water_data_read[i][j] < 1:
-            water_data_read[i][j] = 0
-        else:
-            water_data_read[i][j] = 1
+create_mask(test_arr)
+            
+# Plot the result
+plt.imshow(test_arr)
 
 # Save as tif
 with rasterio.open('water.tif', 'w', **metadata) as dst:
-    dst.write(water_data_read)
+    dst.write(test_arr)
+    
+    
+    
+
+
 
 
 caphaitien_coords = [-72.273903,19.671135,-72.159233,19.798714]

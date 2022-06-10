@@ -27,11 +27,11 @@ from load_data_from_zip_folders import load_data
 #from load_images import load_images
 from stack_images import stack_images
 from stack_images import add_ratio
-from visualize import show_backscatter
-from visualize import show_histograms
+from visualize import show_backscatter, show_histograms, visualizePrediction
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
 from train_model import GaussianNaiveBayes
+from predict import predict
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
@@ -43,36 +43,45 @@ training_folder = "TrainingData"
 list_of_images = load_data(dir_name=input_folder, dest_name = images_folder)
 #This function returns a list of image names and stores all images with those names in a folder
 
-## Load images from the images_folder as rasterio dataset readers
-#rasters = load_images(list_of_images, dest_name = images_folder)
-
-## Optionally: load a local subset of a global DEM and global water bodies dataset to aid in the classification
-
+## To be done: load a local subset of a global DEM and global water bodies dataset to aid in the classification
+#Load DEM from a folder and crop to the extent of the radar image ...
+# DEM will also have to be resampled so that it matches the radar images
+#Load water bodies from a folder and crop to the extent of the radar image ...
 
 
 ## STEP 2: Process data 
 ## If needed: speckle filter ... 
 list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
+
 ## Create for each date in the time series a stack of VV, VH and VV/VH ratio images
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_folder)
-
+## To be done: use global water bodies dataset to mask permanently open water
+## To be done: also add DEM to the stacks
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
+## To be done: use global DEM as fourth band to aid in the classification
 X, y, training_polys = loadTrainingData(training_folder)
 
 #Train a Gaussian Naive Bayes model
-model = GaussianNaiveBayes(X,y)    
+gnb_model = GaussianNaiveBayes(X,y)    
+
+#Predict flooded areas
 ## Classify each pixel for each image as open water, flooded area or dry area
-## Optionally: use global water bodies dataset to mask open water
-## OPtionally: use global DEM to aid in the classification
+## First for one image: later we need to make the script such that it predicts for each image in the folder
+img = "TrainingData\\2021_04_05\\TrainingSentinel_2021_04_05.tiff"
+prediction = predict(img, gnb_model, training_polys)
+
 ## Return a time series of classified maps
 
 ## STEP 3: Visualize Results
 #Show some simple histograms:
 show_histograms(stacked_rasters_names)
 show_backscatter(stacked_rasters_names)
+
+#show prediction results of one image:
+visualizePrediction(img, prediction)
 ## Create a flood frequency map based on the time series
 ## Create nice visualization
 ## Optionally: make animated map that shows classification for each time step in order

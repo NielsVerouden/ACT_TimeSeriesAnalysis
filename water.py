@@ -14,25 +14,26 @@ import json
 from shapely.geometry import box
 import geopandas as gpd
 from rasterio.warp import calculate_default_transform, reproject, Resampling
+import resample
+import arcpy
+from rasterio.features import shapes
+from shapely.geometry import shape
 
 
-
-# Open datasets
-## Open water data
-water = rs.open(r'data/water_data.tif')
+# Open data
+## Open water map
+water = rs.open("data/occurrence_80W_20Nv1_3_2020.tif")
 
 ## Open landuse map
 landuse = rs.open("data/2022-02-01_stack.tiff")
 
-
+# Create a common crs based on the input data
+## Give the object crs the crs of the input data
 crs = landuse.crs
 
 # Create arrays
 ## Create water array
 water_arr = water.read(1)
-
-## Plot the water map
-show(water_arr)
 
 ## Create landuse array
 landuse_arr = landuse.read()
@@ -52,18 +53,18 @@ landuse_arr = landuse_arr.astype('uint8')
 
 
 
-# Create bounding box
+
+
+
+
+# Create a bounding box
 minx, miny = -72.206603569, 19.7478899750001
 maxx, maxy = -72.203443465, 19.7503596370001
 bbox = box(minx, miny, maxx, maxy)
 
-
-
-
-# Crop to the same extent
+# Crop the images to the same extent with the boundingbox
 ## Create a bounding box to use for cropping
 crop = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
-
 
 ## Reproject to the correct crs: the crs of the landuse data
 crop = crop.to_crs(crs=landuse.crs.data)
@@ -84,34 +85,107 @@ landuse_arr_crp, out_transform = mask(landuse, coords, crop=True)
 
 ### Crop the water data
 water_arr_crp, out_transform = mask(water, coords, crop=True)
+            
 
-## Plot the maps
+
+
+## Save only the first layer of the data
 ### Plot the landuse map
-plt.imshow(landuse_arr_crp[0])
+landuse_arr_crp = landuse_arr_crp[0]
 
 ### Plot the water map
-plt.imshow(water_arr_crp[0])
+water_arr_crp = water_arr_crp[0]
+
+
+
+# For the water bodies, you only want the map to indicate where is water and
+# where is not, therefore only 1 and 0 will be visible on map. The following
+# function is used for that
+def create_mask (water_data): 
+    for i in range(0,len(water_data)):
+        for j in range(0, len(water_data)):
+            if water_data[i][j] < 1:
+                water_data[i][j] = 0
+            else:
+                water_data[i][j] = 1
+    return(water_data)
+
+water_arr_crp_bl= create_mask(water_arr_crp)
+
+plt.imshow(water_arr_crp_bl)
 
 
 
 
 
 
-with rs.open('./data/water_data.tif') as src:
-    transform, width, height = calculate_default_transform(src.crs, crs, 
-                                                           src.width, 
-                                                           src.height, 
-                                                           *src.bounds)
-    kwargs = src.meta.copy()
-    kwargs.update({'crs': crs,'transform': transform, 'width': width,'height': height})
+mask = None
+with rasterio.Env():
+    with rs.open('./data/water_bodies.tif') as src:
+        image = src.read(1) # first band
+        results = (
+        {'properties': {'raster_val': v}, 'geometry': s}
+        for i, (s, v) 
+        in enumerate(
+            shapes(image, mask=mask, transform=src.transform)))
+
+geoms = list(results)
+
+print(shape(geoms[1]['geometry'])
+
+# Call the coordinates from water bodies
+water_bodies_1 = geoms[1]['geometry']['coordinates']
 
 
-kwargs
+
+
+
+# Save the data as tif
+## Create a function to save data
+# Create and save as raster file again
+def save_raster(file_path, array, raster,crs):
+    with rs.open(file_path, 
+                           'w',
+                    driver='GTiff',
+                    height=array.shape[0],
+                    width=array.shape[1],
+                    count=1,
+                    dtype=array.dtype,
+                    crs=crs,
+                    nodata=None, # change if data has nodata value
+                    transform=raster.transform) as dst:
+        dst.write(array, 1)
+        
+save_raster('./data/water_bodies.tif', water_arr_crp_bl, water, crs)
+
+
+test = rs.open('./data/water_bodies.tif')
+
+
+
+
+test <- resample(water_arr_crp_bl, landuse_arr_crp, method="ngb")
+
+
+### Crop the water data
+test, out_transform = mask(test, water_arr_crp_bl, crop=True)
 
 
 
 
 
+
+
+
+
+
+
+
+
+np.where(water_arr<1, water_arr, landuse_arr)
+
+
+water_arr_crp
 
 
 
@@ -229,5 +303,38 @@ landuse_2 = rs.open(r'data/landuse_2.tif')
 
 landuse_2
         
+
+
+# Resample and save the data
+## Resample and save the landuse data
+with rs.open('./data/2022-02-01_stack.tiff') as src:
+    transform, width, height = calculate_default_transform(src.crs, crs, 
+                                                           src.width, 
+                                                           src.height, 
+                                                           *src.bounds)
+    kwargs = src.meta.copy()
+    kwargs.update({'crs': crs,'transform': transform, 'width': width,'height': height})
+    
+    with rasterio.open('./data/landuse_res.tif', 'w', **kwargs) as dst:
+            reproject(source=rasterio.band(src, 1),destination=rasterio.band(dst, 1),
+                src_transform=src.transform,
+                src_crs=src.crs,
+                dst_transform=transform,
+                dst_crs=crs,
+                resampling=Resampling.nearest)
+
+# Open the resampled data
+## Open the resampled water data
+water = rs.open(r'./data/water_data.tif')
+
+## Open the resampled landuse data
+landuse = rs.open(r'./data/landuse_res.tif')
+
+
+
+
+
+
+
         
 

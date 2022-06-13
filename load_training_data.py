@@ -20,15 +20,6 @@ from shapely.geometry import mapping
 import rasterio as rio
 from rasterio.mask import mask
 from sklearn.model_selection import train_test_split
-"""
-import pyproj
-from matplotlib import pyplot as plt
-from sklearn.naive_bayes import GaussianNB
-from rasterio.plot import show
-from rasterio.plot import show_hist
-from rasterio.windows import Window
-from rasterio.plot import reshape_as_raster, reshape_as_image
-"""
 
 def loadTrainingData(training_folder):
     #Retrieve all folders in the training_folder

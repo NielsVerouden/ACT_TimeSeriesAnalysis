@@ -22,10 +22,12 @@ def createFrequencyMap(filenames):
             img[img > 0] = 1
             frequencymap = np.add(frequencymap,img)
             
-        #very simple visualization:
-        frequencymap_plot = reshape_as_image(frequencymap)
-        plt.imshow(frequencymap_plot)
-    return(frequencymap)
+    #very simple visualization:
+    frequencymap_plot = reshape_as_image(frequencymap)
 
+    c = plt.imshow(frequencymap_plot, cmap='jet')
+    plt.colorbar(c)
+    plt.show()
+    return(frequencymap)
 
 

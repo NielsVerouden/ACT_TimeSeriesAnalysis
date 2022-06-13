@@ -31,12 +31,13 @@ from visualize import show_backscatter, show_histograms, visualizePrediction
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
 from train_model import GaussianNaiveBayes
-from predict import predict
+from predict import predict, getAccuracy_ConfMatrix
 
 input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
 training_folder = "TrainingData"
+show_sentinel_histograms, show_sentinel_images = False, False
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -56,32 +57,43 @@ list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, si
 ## Create for each date in the time series a stack of VV, VH and VV/VH ratio images
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_folder)
+
+#Show some simple histograms and plot the images, if specified in line 40:
+if show_sentinel_histograms:
+    show_histograms(stacked_rasters_names)
+
+if show_sentinel_images:
+    show_backscatter(stacked_rasters_names)
+    
 ## To be done: use global water bodies dataset to mask permanently open water
 ## To be done: also add DEM to the stacks
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
 ## To be done: use global DEM as fourth band to aid in the classification
-X, y, training_polys = loadTrainingData(training_folder)
+X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
 
 #Train a Gaussian Naive Bayes model
-gnb_model = GaussianNaiveBayes(X,y)    
+#And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
+gnb_model = GaussianNaiveBayes(X_train,y_train)    
+gnb_test_acc, gnb_cm = getAccuracy_ConfMatrix(gnb_model,X_test, y_test)
 
 #Predict flooded areas
 ## Classify each pixel for each image as open water, flooded area or dry area
 ## First for one image: later we need to make the script such that it predicts for each image in the folder
-img = "TrainingData\\2021_04_05\\TrainingSentinel_2021_04_05.tiff"
+img = stacked_rasters_names[0]
 prediction = predict(img, gnb_model, training_polys)
+predictions = predict(stacked_rasters_names, gnb_model, training_polys)
 
-## Return a time series of classified maps
+## predictions is a dictionairy containing a time series of classified maps
 
 ## STEP 3: Visualize Results
-#Show some simple histograms:
-show_histograms(stacked_rasters_names)
-show_backscatter(stacked_rasters_names)
-
 #show prediction results of one image:
-visualizePrediction(img, prediction)
+visualizePrediction(prediction)
+
+#show all prediction results:
+visualizePrediction(predictions)
+
 ## Create a flood frequency map based on the time series
 ## Create nice visualization
 ## Optionally: make animated map that shows classification for each time step in order

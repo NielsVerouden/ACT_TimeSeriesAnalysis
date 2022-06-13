@@ -4,6 +4,7 @@ from rasterio.plot import show_hist
 import matplotlib.pyplot as plt
 import numpy as np
 from rasterio.plot import reshape_as_image
+import glob
 
 def show_histograms(filenames):
     filenames_sorted = sorted(filenames)
@@ -36,48 +37,59 @@ for id in range(0,len(stacked_rasters_names)):
 """
 
 ######Visualize:
-def visualizePrediction(image_path, prediction):
-    with rio.open(image_path) as src:
-        # may need to reduce this image size if your kernel crashes, takes a lot of memory
-        img = src.read()
-    
-    # Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
-    reshaped_img = reshape_as_image(img)
-    
-    def color_stretch(image, index):
-        colors = image[:, :, index].astype(np.float64)
-        for b in range(colors.shape[2]):
-            colors[:, :, b] = rio.plot.adjust_band(colors[:, :, b])
-        return colors
+def visualizePrediction(predictions):
+    for date, prediction in predictions.items():
+        #search for files in the directory with stacked images
+        pattern = 'radar_time_series_stacked/*%s*.tiff' % date
+        for file in glob.glob(pattern):
+            image_path = file
+            
+        with rio.open(image_path) as src:
+            # may need to reduce this image size if your kernel crashes, takes a lot of memory
+            img = src.read()
         
-    # find the highest pixel value in the prediction image
-    n = int(np.max(prediction))
-    
-    # next setup a colormap for our map
-    colors = dict((
-        (0, (139,69,19, 255)),      # Brown - dry area
-        (1, (48, 156, 214, 255)),    # Blue - flooded
-        (2, (96, 19, 134, 255)),    # Purple - flooded urban
-    ))
-    
-    # Put 0 - 255 as float 0 - 1
-    for k in colors:
-        v = colors[k]
-        _v = [_v / 255.0 for _v in v]
-        colors[k] = _v
+        # Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
+        reshaped_img = reshape_as_image(img)
         
-    index_colors = [colors[key] if key in colors else 
-                    (255, 255, 255, 0) for key in range(0, n+1)]
-    
-    cmap = plt.matplotlib.colors.ListedColormap(index_colors, 'Classification', n+1)
-    fig, axs = plt.subplots(2,1,figsize=(10,7))
-    
-    img_stretched = color_stretch(reshaped_img, [0,1,2])
-    axs[0].imshow(img_stretched)
-    
-    axs[1].imshow(prediction, cmap=cmap, interpolation='none')
-    
-    fig.show()
+        def color_stretch(image, index):
+            colors = image[:, :, index].astype(np.float64)
+            for b in range(colors.shape[2]):
+                colors[:, :, b] = rio.plot.adjust_band(colors[:, :, b])
+            return colors
+            
+        # find the highest pixel value in the prediction image
+        n = int(np.max(prediction))
+        
+        # next setup a colormap for our map
+        colors = dict((
+            (0, (139,69,19, 255)),      # Brown - dry area
+            (1, (48, 156, 214, 255)),    # Blue - flooded
+            (2, (96, 19, 134, 255)),    # Purple - flooded urban
+        ))
+        
+        # Put 0 - 255 as float 0 - 1
+        for k in colors:
+            v = colors[k]
+            _v = [_v / 255.0 for _v in v]
+            colors[k] = _v
+            
+        index_colors = [colors[key] if key in colors else 
+                        (255, 255, 255, 0) for key in range(0, n+1)]
+        
+        cmap = plt.matplotlib.colors.ListedColormap(index_colors, 'Classification', n+1)
+        fig, axs = plt.subplots(2,1,figsize=(10,7))
+        
+        img_stretched = color_stretch(reshaped_img, [0,1,2])
+        axs[0].imshow(img_stretched)
+        
+        axs[1].imshow(prediction, cmap=cmap, interpolation='none')
+        
+        fig.show()
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
-
-visualizePrediction(img, prediction)
+"""
+date = list(prediction.keys())[0]
+pattern = 'radar_time_series_stacked/*%s*.tiff' % date
+print(pattern)
+for file in glob.glob(pattern):
+    print(file)
+    """

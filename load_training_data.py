@@ -19,6 +19,7 @@ import os
 from shapely.geometry import mapping
 import rasterio as rio
 from rasterio.mask import mask
+from sklearn.model_selection import train_test_split
 """
 import pyproj
 from matplotlib import pyplot as plt
@@ -70,12 +71,12 @@ def loadTrainingData(training_folder):
                 y = np.append(y,[polys["Label"][index]] * out_image_reshaped.shape[0]) 
                 # stack the pizels onto the pixel array
                 X = np.vstack((X,out_image_reshaped))   
-        """
+       
         # What are our classification labels?
         labels = np.unique(polys["Label"])
         print('The training data include {n} classes: {classes}\n'.format(n=labels.size, 
                                                                           classes=labels))
-        
+        """
         # We will need a "X" matrix containing our features, and a "y" array containing our labels
         print('Our X matrix is sized: {sz}'.format(sz=X.shape))
         print('Our y array is sized: {sz}'.format(sz=y.shape))
@@ -83,8 +84,12 @@ def loadTrainingData(training_folder):
     #After the for-loop, we have two arrays: X and y
     #X has all pixel values of the 3 bands
     #y has the labels per pixels
+    
+    #We randomly split X and y in training and test datasets
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
     #These arrays can later be used to train machine or deep learning models
-    return(X,y,polys)
+    # and to get unbiased estimates of test accuracy
+    return(X_train, X_test, y_train, y_test, polys)
 
 """
 #Helper function:

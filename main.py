@@ -37,7 +37,7 @@ input_folder = 'sentinelhub_downloads'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
 training_folder = "TrainingData"
-show_sentinel_histograms, show_sentinel_images = False, False
+show_sentinel_histograms, show_sentinel_images = True, False
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -79,10 +79,11 @@ gnb_model = GaussianNaiveBayes(X_train,y_train)
 gnb_test_acc, gnb_cm = getAccuracy_ConfMatrix(gnb_model,X_test, y_test)
 
 #Predict flooded areas
-## Classify each pixel for each image as open water, flooded area or dry area
-## First for one image: later we need to make the script such that it predicts for each image in the folder
+## Classify each pixel of each image as flooded area, flooded urban area or dry area
+## Either for one file or for all files in a list
 img = stacked_rasters_names[0]
 prediction = predict(img, gnb_model, training_polys)
+
 predictions = predict(stacked_rasters_names, gnb_model, training_polys)
 
 ## predictions is a dictionairy containing a time series of classified maps

@@ -83,7 +83,7 @@ def visualizePrediction(predictions):
         axs[0].imshow(img_stretched)
         
         axs[1].imshow(prediction, cmap=cmap, interpolation='none')
-        
+        fig.suptitle(date)
         fig.show()
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
 """

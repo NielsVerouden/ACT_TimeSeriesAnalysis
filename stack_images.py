@@ -2,6 +2,7 @@ import rasterio as rio
 from rasterio.plot import show
 import os
 import numpy as np
+import re
 ##stack images from the list of dataset readers
 ##the function returns a list containing all rasterio dataset readers for each date
 ## where each dataset reader contains three bands: VV, VH and VV/VH ratio
@@ -31,16 +32,31 @@ def stack_images(image_names, input_name='radar_time_series', output_name = 'rad
         meta.update(count = len(file_list_one_date))
         
         # Read each layer and write it to stack
+        """
         with rio.open(output_name+'/'+str(date)+'_stack.tiff', 'w', **meta) as dst:
             for id, layer in enumerate(file_list_one_date, start=1):
                 with rio.open(input_name+'/'+ layer) as src1:
                     dst.write_band(id, src1.read(1))
-            #also use band names
-            #dst.descriptions = tuple([file_list_one_date[0], file_list_one_date[1]])
+        """
+        
+        #VV:
+        with rio.open(output_name+'/'+str(date)+'_stack.tiff', 'w', **meta) as dst:
+            vvreg = re.compile(r'\S*_VV_\S*')
+            vvlayer = list(filter(vvreg.search, file_list_one_date))[0]
+            
+            vhreg = re.compile(r'\S*_VH_\S*')
+            vhlayer = list(filter(vhreg.search, file_list_one_date))[0]
+            
+            with rio.open(input_name+'/'+ vvlayer) as src1:
+                dst.write_band(1, src1.read(1))
+            with rio.open(input_name+'/'+ vhlayer) as src1:
+                dst.write_band(2, src1.read(1))
+        dst.close()  
+         
         list_of_stacked_images.append(output_name+'/'+str(date)+'_stack.tiff')
         
     #stacked_rasters = [rio.open(filename) for filename in list_of_stacked_images]
-    list_of_stacked_images = list(set(list_of_stacked_images))
+    list_of_stacked_images = sorted(list(set(list_of_stacked_images)))
     return(list_of_stacked_images)             
 
 def add_ratio(stacked_names, folder='radar_time_series_stacked'):
@@ -73,3 +89,15 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
     return(stacked_names)
 
 ## credit: https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-calculations.html
+"""
+stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
+
+for stack in stacked_rasters_names:
+    
+    raster_stack = rio.open(stack)
+    
+    meta = raster_stack.meta
+    print(raster_stack.tags(ns='polar'))
+
+raster_stack.close()
+"""

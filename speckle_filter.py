@@ -19,7 +19,7 @@ def apply_lee_filter(raster_images, input_folder, size=5):
      
     for stack in raster_images:
         stack = os.path.join(input_folder,stack)
-        
+
         with rio.open(stack,'r') as dst:
             meta = dst.meta
             image = dst.read(1)

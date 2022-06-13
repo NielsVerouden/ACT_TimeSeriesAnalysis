@@ -3,13 +3,16 @@ import rasterio as rs
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-import fiona
+from fiona.crs import from_epsg
 import rasterio
 from rasterio.mask import mask
 from rasterio.mask import mask
 import gdal
 from rasterio.plot import show
 from shapely.geometry import mapping
+import json
+from shapely.geometry import box
+import geopandas as gpd
 
 # Open dataset
 test = rs.open(r'data/really_small_area/really_small.tif')
@@ -70,6 +73,36 @@ landuse_arr = landuse_arr[1]
     
 # Plot the landuse map
 show(landuse_arr)
+
+
+
+
+# https://automating-gis-processes.github.io/CSC18/lessons/L6/clipping-raster.html
+
+# Create bounding box
+minx, miny = -72.206603569, 19.7478899750001
+maxx, maxy = -72.203443465, 19.7503596370001
+bbox = box(minx, miny, maxx, maxy)
+
+# Insert the bounding box into the dataframe
+landuse_df = gpd.GeoDataFrame({'geometry': bbox}, index=[0], crs=from_epsg(4326))
+
+# Reproject to the correct crs
+landuse_df = landuse_df.to_crs(crs=landuse.crs.data)
+
+# Parse features from GeoDataFrame in such a manner that rasterio wants them
+def getFeatures(gdf):
+    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    return [json.loads(gdf.to_json())['features'][0]['geometry']]
+
+
+# Get the geometry coordinates by using the function
+coords = getFeatures(landuse_df)
+print(coords)
+
+out_img, out_transform = mask(landuse, coords, crop=True)
+
+
 
 
 

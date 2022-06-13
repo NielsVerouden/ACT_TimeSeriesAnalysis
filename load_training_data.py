@@ -91,12 +91,5 @@ def loadTrainingData(training_folder):
     # and to get unbiased estimates of test accuracy
     return(X_train, X_test, y_train, y_test, polys)
 
-"""
-#Helper function:
-def str_class_to_int(class_array):
-    class_array[class_array == np.unique(polys["Label"])[0]] = 0
-    class_array[class_array == np.unique(polys["Label"])[0]] = 1
-    class_array[class_array == np.unique(polys["Label"])[0]] = 2
-    return(class_array.astype(int))
-"""
+
 #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html 

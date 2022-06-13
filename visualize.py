@@ -18,7 +18,7 @@ def show_histograms(filenames):
     
             axhist.set_title(title, size=60)
             axhist.legend(list(src.descriptions), prop={'size': 40})
-            axhist.set_ylim([0,0.01])
+            #axhist.set_ylim([0,0.01])
             plt.show()
             #optional: add code to save histograms in a folder
 
@@ -86,6 +86,8 @@ def visualizePrediction(predictions):
         fig.suptitle(date)
         fig.show()
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
+    
+
 """
 date = list(prediction.keys())[0]
 pattern = 'radar_time_series_stacked/*%s*.tiff' % date

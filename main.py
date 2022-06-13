@@ -32,8 +32,9 @@ from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
 from train_model import GaussianNaiveBayes
 from predict import predict, getAccuracy_ConfMatrix
+from postprocessing import createFrequencyMap
 
-input_folder = 'sentinelhub_downloads'
+input_folder = 'CapHaitienDownloadsApril2021'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
 training_folder = "TrainingData"
@@ -80,22 +81,25 @@ gnb_test_acc, gnb_cm = getAccuracy_ConfMatrix(gnb_model,X_test, y_test)
 
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
-## Either for one file or for all files in a list
-img = stacked_rasters_names[0]
-prediction = predict(img, gnb_model, training_polys)
-
-predictions = predict(stacked_rasters_names, gnb_model, training_polys)
+## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list
+predictions_dict, predictions_filenames= predict(stacked_rasters_names, gnb_model, training_polys)
 
 ## predictions is a dictionairy containing a time series of classified maps
 
 ## STEP 3: Visualize Results
-#show prediction results of one image:
-visualizePrediction(prediction)
-
+#show prediction results of one image (uncomment):
+#visualizePrediction(prediction)
 #show all prediction results:
-visualizePrediction(predictions)
+visualizePrediction(predictions_dict)
+
+## STEP 4: Post-processing
+#Eliminate lonely pixels (which are probably misclassified)
+# !!! Takes a long time !!!
+#filtered_predictions = majorityfilter(predictions_filenames, size=3)
+#visualizePrediction(filtered_predictions)
 
 ## Create a flood frequency map based on the time series
 ## Create nice visualization
+frequencymap = createFrequencyMap(predictions_filenames)
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time

@@ -85,6 +85,7 @@ def visualizePrediction(predictions):
         axs[1].imshow(prediction, cmap=cmap, interpolation='none')
         fig.suptitle(date)
         fig.show()
+    plt.close(fig)
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
     
 

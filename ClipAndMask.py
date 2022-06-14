@@ -59,8 +59,11 @@ def clipRaster(bounding_raster_names, raster_to_be_clipped_name, output_folder):
 #clipRaster(sentinel_name, water, output_name)
 
 
-def maskWater(raster_names,water_name,dest_folder,mask_value=0):
-    for raster_name in raster_names:
+def maskWater(combinations_dict,dest_folder,mask_value=0):
+    masked_filenames=[]
+    if not os.path.exists(dest_folder): os.makedirs(dest_folder)
+    #Loop over each combination from the dictionary:
+    for raster_name, water_name in combinations_dict.items():
         with rio.open(water_name) as dst:
             water_data=dst.read()
             water_meta = dst.meta
@@ -95,10 +98,12 @@ def maskWater(raster_names,water_name,dest_folder,mask_value=0):
             raster[i][water_binary_resized[0]==1]=mask_value
         
         # Save the rasters as tif
-        outputpath = os.path.join(dest_folder,raster_name)
+        output_name="MaskedRasterStack_%s.tiff"%raster_name[-21:-11]
+        outputpath = os.path.join(dest_folder,output_name)
         with rio.open(outputpath, 'w', **raster_meta) as dst:
-            dst.write(raster.astype(rio.uint8))
-        return outputpath
+            dst.write(raster.astype(rio.float32))
+        masked_filenames.append(outputpath)
+    return masked_filenames
 """
 raster_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
 water_name = "WaterBodies//occurrence_80W_20Nv1_3_2020_Cropped.tiff"

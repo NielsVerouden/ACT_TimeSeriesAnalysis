@@ -140,6 +140,7 @@ water_bodies_1 = geoms[1]['geometry']['coordinates']
 
 
 
+
 # Save the data as tif
 ## Create a function to save data
 # Create and save as raster file again

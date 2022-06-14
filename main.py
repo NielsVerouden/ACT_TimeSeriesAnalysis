@@ -30,7 +30,7 @@ from stack_images import add_ratio
 from visualize import show_backscatter, show_histograms, visualizePrediction
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
-from train_model import GaussianNaiveBayes
+from train_model import GaussianNaiveBayes, RandomForest
 from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 
@@ -38,7 +38,14 @@ input_folder = 'CapHaitienDownloadsApril2021'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
 training_folder = "TrainingData"
+
+#Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = True, False
+
+#Change your preferred model according to your preferences:
+# Some models have additional parameters that can be adjusted to your liking
+options = ["GaussianNaiveBayes", "RandomForest"]
+preferred_model = options[1]
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -76,14 +83,22 @@ X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_fol
 
 #Train a Gaussian Naive Bayes model
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
-gnb_model = GaussianNaiveBayes(X_train,y_train)    
-gnb_test_acc, gnb_cm = getAccuracy_ConfMatrix(gnb_model,X_test, y_test)
+if preferred_model == "GaussianNaiveBayes":
+    model = GaussianNaiveBayes(X_train,y_train)    
+    test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
+
+elif preferred_model == "RandomForest":
+    model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
+    test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
+
+else:
+    raise Exception("Preferred model does not exist, please pick one of %s"%options)
 
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 ## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list
 # Set majorityfilter to True to apply majority filter (more accurate but takes a few minutes)
-predictions_dict, predictions_filenames= predict(stacked_rasters_names, gnb_model, training_polys, majorityfilter=False)
+predictions_dict, predictions_filenames= predict(stacked_rasters_names, model, training_polys, majorityfilter=False)
 
 ## predictions is a dictionairy containing a time series of classified maps
 
@@ -98,6 +113,6 @@ visualizePrediction(predictions_dict)
 ## Create a flood frequency map based on the time series
 ## How often is each pixel flooded?
 ## Create nice visualization
-frequencymap = createFrequencyMap(predictions_filenames)
+frequencymaps = createFrequencyMap(predictions_filenames)
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time

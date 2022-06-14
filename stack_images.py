@@ -39,7 +39,7 @@ def stack_images(image_names, input_name='radar_time_series', output_name = 'rad
                     dst.write_band(id, src1.read(1))
         """
         
-        #VV:
+        #Finding the VV and VH tiff files using regex pattern:
         with rio.open(output_name+'/'+str(date)+'_stack.tiff', 'w', **meta) as dst:
             vvreg = re.compile(r'\S*_VV_\S*')
             vvlayer = list(filter(vvreg.search, file_list_one_date))[0]

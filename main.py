@@ -33,19 +33,21 @@ from load_training_data import loadTrainingData
 from train_model import GaussianNaiveBayes, RandomForest, knn, svm
 from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
+from ClipAndMask import clipRaster, maskWater
 
 input_folder = 'CapHaitienDownloadsApril2021'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
 training_folder = "TrainingData"
+waterbodies_folder = "WaterBodies"
 
 #Indicate whether all images and histograms need to be plotted:
-show_sentinel_histograms, show_sentinel_images = True, False
+show_sentinel_histograms, show_sentinel_images = False, False
 
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
 options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
-preferred_model = options[-1] #Counting starts at zero !
+preferred_model = options[1] #Counting starts at zero !
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -66,6 +68,13 @@ list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, si
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_folder)
 
+##Create crops of the water bodies dataset to the extent of each sentinel image
+## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
+water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+water_sentinel_combis = clipRaster(stacked_rasters_names, water, waterbodies_folder)
+
+#Now mask the water bodies from each image
+maskWater()
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
     show_histograms(stacked_rasters_names)
@@ -73,7 +82,6 @@ if show_sentinel_histograms:
 if show_sentinel_images:
     show_backscatter(stacked_rasters_names)
     
-## To be done: use global water bodies dataset to mask permanently open water
 ## To be done: also add DEM to the stacks
 
 ##STEP 3: Load training data and train a supervised classification model

@@ -1,77 +1,116 @@
 # Import packages
-import rasterio as rs
-import matplotlib.pyplot as plt
-import pandas as pd
+import rasterio as rio
 import numpy as np
-from fiona.crs import from_epsg
-import rasterio
 from rasterio.mask import mask
-from rasterio.mask import mask
-import gdal
-from rasterio.plot import show
-from shapely.geometry import mapping
-import json
 from shapely.geometry import box
-from shapely.geometry import Polygon
 import geopandas as gpd
-from rasterio.warp import calculate_default_transform, reproject, Resampling
-from rasterio.features import shapes
-from shapely.geometry import shape
-from shapely.geometry import mapping
-from shapely.wkt import loads
 from pycrs.parse import from_epsg_code
-from rasterio.plot import show_hist
-#import rioxarray
+from skimage.transform import resize
+import os
+import json
+#water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+#sentinel_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
+#output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
 
-
-
-
-water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
-sentinel_name = "radar_time_series_stacked/2022-02-01_stack.tiff"
-output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
-def clipRaster(bounding_raster_name, raster_to_be_clipped_name, output_name):
-    
+def clipRaster(bounding_raster_names, raster_to_be_clipped_name, output_folder):
+    dic = {}
+    for bounding_raster_name in bounding_raster_names:
     ## Open the big raster and save metadata for later
-    raster = rs.open(raster_to_be_clipped_name)
-    raster_meta = raster.meta.copy()
-    epsg_code = int(raster.crs.data['init'][5:])
+        raster = rio.open(raster_to_be_clipped_name)
+        raster_meta = raster.meta.copy()
+        epsg_code = int(raster.crs.data['init'][5:])
+    
+        ## Open small raster
+        boundingraster = rio.open(bounding_raster_name)
+        
+        #Crop the water raster to the sentinel image:
+        #No need for reprojection since both have the same coordinate system
+        #1. Get the bounding box of the sentinel-1 image:
+        bounds=boundingraster.bounds    
+        geom = box(*bounds)
+        
+        #2. Get a GeoDataFrame of the bounds:
+        geodf = gpd.GeoDataFrame({"id":1,"geometry":[geom]})
+        
+        ## Parse features from GeoDataFrame in such a manner that rasterio wants them
+        ### Create a function to do it
+        def getFeatures(gdf):
+            #Function to parse features from GeoDataFrame in such a manner that rasterio wants them
+            return [json.loads(gdf.to_json())['features'][0]['geometry']]
+        
+        coords = getFeatures(geodf)
+        
+        #Mask the raster using the bounding box of the smal raster
+        out_img, out_transform = mask(raster, shapes=coords, crop=True)
+        
+        #Get ready to save the numpy array as a geotiff: update metadata
+        raster_meta.update({"driver": "GTiff", "height": out_img.shape[1],
+                           "width": out_img.shape[2], "transform": out_transform,
+                          "crs": from_epsg_code(epsg_code).to_proj4()})
+        
+        output_name="WaterBodies_CorrespondinTo_%s.tiff"%bounding_raster_name[-21:-11]
+        output_path=os.path.join(output_folder,output_name)
+        with rio.open(output_path, "w", **raster_meta) as dest:
+            dest.write(out_img)
+        dic[bounding_raster_name]=output_path
+        raster.close()
+        boundingraster.close()
+    return dic
+#clipRaster(sentinel_name, water, output_name)
 
-    ## Open small raster
-    boundingraster = rs.open(bounding_raster_name)
-    
-    #Crop the water raster to the sentinel image:
-    #No need for reprojection since both have the same coordinate system
-    #1. Get the bounding box of the sentinel-1 image:
-    bounds=boundingraster.bounds    
-    geom = box(*bounds)
-    
-    #2. Get a GeoDataFrame of the bounds:
-    geodf = gpd.GeoDataFrame({"id":1,"geometry":[geom]})
-    
-    ## Parse features from GeoDataFrame in such a manner that rasterio wants them
-    ### Create a function to do it
-    def getFeatures(gdf):
-        """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
-        return [json.loads(gdf.to_json())['features'][0]['geometry']]
-    
-    coords = getFeatures(geodf)
-    
-    #Mask the raster using the bounding box of the sentinel raster
-    out_img, out_transform = mask(raster, shapes=coords, crop=True)
-    
-    #Get ready to save the numpy array as a geotiff: update metadata
-    raster_meta.update({"driver": "GTiff", "height": out_img.shape[1],
-                       "width": out_img.shape[2], "transform": out_transform,
-                      "crs": from_epsg_code(epsg_code).to_proj4()})
-    
-    with rasterio.open(output_name, "w", **raster_meta) as dest:
-        dest.write(out_img)
-    return
 
-clipRaster(sentinel_name, water, output_name)
-
-
+def maskWater(raster_names,water_name,dest_folder,mask_value=0):
+    for raster_name in raster_names:
+        with rio.open(water_name) as dst:
+            water_data=dst.read()
+            water_meta = dst.meta
+            
+        with rio.open(raster_name) as dst:
+            raster =  dst.read()
+            raster_meta=dst.meta
+            
+        # For the water bodies, you only want the map to indicate where is water and
+        # where is not, therefore only 1 and 0 will be visible on map. The following
+        # function is used for that. All pixels > 1 are converted to 1 (water)
+        def create_mask (array): 
+            #create a binary raster of the first band of array
+            array[0][array[0]>0]=1
+            return(array)
+        
+        water_binary= create_mask(water_data)
+        
+        #Resample low res water dataset to the same resolution as the sentinel array
+        band = water_binary[0] #band with values 0 and 1
+        #Resize function from scikit image
+        band_resized = resize(band, (raster.shape[1], raster.shape[2]), anti_aliasing=True)
+        #Due to default interpolation: again assing binary values
+        band_resized[band_resized>0]=1
+        #Add extra dimension (->1 by x by y)
+        water_binary_resized = np.expand_dims(band_resized, 0)
+        water_binary_resized = water_binary_resized.astype(int)
+        
+        #Give all pixels in the raster image a specified value if there is water
+        #for-loop over each band
+        for i in range(0,raster.shape[0]):
+            raster[i][water_binary_resized[0]==1]=mask_value
+        
+        # Save the rasters as tif
+        outputpath = os.path.join(dest_folder,raster_name)
+        with rio.open(outputpath, 'w', **raster_meta) as dst:
+            dst.write(raster.astype(rio.uint8))
+        return outputpath
 """
+raster_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
+water_name = "WaterBodies//occurrence_80W_20Nv1_3_2020_Cropped.tiff"
+dest_folder="FloodPredictions"
+outputfilename="MaskedFloodPrediction_2021-04-02.tiff"
+"""
+
+
+
+    
+"""
+Marks stuff:
 clipped = rs.open("WaterBodies/clippedwater.tiff")
 show(clipped)
 # Create a common crs based on the input data
@@ -125,43 +164,7 @@ landuse_arr_crp, out_transform = mask(landuse, coords, crop=True)
 water_arr_crp, out_transform = mask(water, coords, crop=True)
 """            
 
-with rs.open(output_name) as dst:
-    water_data=dst.read()
-    water_meta = dst.meta
-    
-with rs.open(sentinel_name) as dst:
-    sentinel =  dst.read()
-    sentinel_meta=dst.meta
-    
-# For the water bodies, you only want the map to indicate where is water and
-# where is not, therefore only 1 and 0 will be visible on map. The following
-# function is used for that. All pixels > 1 are converted to 1 (water)
-def create_mask (water_data): 
-    newdata=water_data[water_data>0]=1
-    return(newdata)
-
-
-water_arr_crp_bl= create_mask(water_data[0])
-
-plt.imshow(water_arr_crp_bl)
-
-
-# Save the rasters as tif
-## Create function to save the data as tif
-# Create and save as raster file again
-def save_raster(file_path, array, raster,crs):
-    with rs.open(file_path, 
-                           'w',
-                    driver='GTiff',
-                    height=array.shape[0],
-                    width=array.shape[1],
-                    count=1,
-                    dtype=array.dtype,
-                    crs=crs,
-                    nodata=None, # change if data has nodata value
-                    transform=raster.transform) as dst:
-        dst.write(array, 1)
-
+"""
 ## Select only the first layer of the data
 ### Select only the first landuse map
 landuse_arr_crp = landuse_arr_crp[0]
@@ -282,7 +285,7 @@ crop = crop.to_crs(crs=landuse.crs.data)
 ## Parse features from GeoDataFrame in such a manner that rasterio wants them
 ### Create a function to do it
 def getFeatures(gdf):
-    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    Function to parse features from GeoDataFrame in such a manner that rasterio wants them
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
 
 #### Get the geometry coordinates by using the function "getFeatures"
@@ -413,7 +416,7 @@ landuse_df = landuse_df.to_crs(crs=landuse.crs.data)
 
 # Parse features from GeoDataFrame in such a manner that rasterio wants them
 def getFeatures(gdf):
-    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    Function to parse features from GeoDataFrame in such a manner that rasterio wants them
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
 
 # Get the geometry coordinates by using the function
@@ -501,7 +504,7 @@ water = rs.open(r'./data/water_data.tif')
 
 ## Open the resampled landuse data
 landuse = rs.open(r'./data/landuse_res.tif')
-
+"""
 
 
 

@@ -19,17 +19,61 @@ from rasterio.features import shapes
 from shapely.geometry import shape
 from shapely.geometry import mapping
 from shapely.wkt import loads
-import rioxarray
+from pycrs.parse import from_epsg_code
+from rasterio.plot import show_hist
+#import rioxarray
 
 
 
-# Open data
-## Open water map
-water = rs.open("data/occurrence_80W_20Nv1_3_2020.tif")
 
-## Open landuse map
-landuse = rs.open("data/2022-02-01_stack.tiff")
+water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+sentinel_name = "radar_time_series_stacked/2022-02-01_stack.tiff"
+output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
+def clipRaster(bounding_raster_name, raster_to_be_clipped_name, output_name):
+    
+    ## Open the big raster and save metadata for later
+    raster = rs.open(raster_to_be_clipped_name)
+    raster_meta = raster.meta.copy()
+    epsg_code = int(raster.crs.data['init'][5:])
 
+    ## Open small raster
+    boundingraster = rs.open(bounding_raster_name)
+    
+    #Crop the water raster to the sentinel image:
+    #No need for reprojection since both have the same coordinate system
+    #1. Get the bounding box of the sentinel-1 image:
+    bounds=boundingraster.bounds    
+    geom = box(*bounds)
+    
+    #2. Get a GeoDataFrame of the bounds:
+    geodf = gpd.GeoDataFrame({"id":1,"geometry":[geom]})
+    
+    ## Parse features from GeoDataFrame in such a manner that rasterio wants them
+    ### Create a function to do it
+    def getFeatures(gdf):
+        """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+        return [json.loads(gdf.to_json())['features'][0]['geometry']]
+    
+    coords = getFeatures(geodf)
+    
+    #Mask the raster using the bounding box of the sentinel raster
+    out_img, out_transform = mask(raster, shapes=coords, crop=True)
+    
+    #Get ready to save the numpy array as a geotiff: update metadata
+    raster_meta.update({"driver": "GTiff", "height": out_img.shape[1],
+                       "width": out_img.shape[2], "transform": out_transform,
+                      "crs": from_epsg_code(epsg_code).to_proj4()})
+    
+    with rasterio.open(output_name, "w", **raster_meta) as dest:
+        dest.write(out_img)
+    return
+
+clipRaster(sentinel_name, water, output_name)
+
+
+"""
+clipped = rs.open("WaterBodies/clippedwater.tiff")
+show(clipped)
 # Create a common crs based on the input data
 ## Give the object crs the crs of the input data
 crs = landuse.crs
@@ -51,15 +95,6 @@ water_arr = water_arr.astype('uint8')
 ### Change the dtypte of the landuse data
 landuse_arr = landuse_arr.astype('uint8')
 
-
-
-
-
-
-
-
-
-
 # Create a bounding box
 minx, miny = -72.206603569, 19.7478899750001
 maxx, maxy = -72.203443465, 19.7503596370001
@@ -75,7 +110,7 @@ crop = crop.to_crs(crs=landuse.crs.data)
 ## Parse features from GeoDataFrame in such a manner that rasterio wants them
 ### Create a function to do it
 def getFeatures(gdf):
-    """Function to parse features from GeoDataFrame in such a manner that rasterio wants them"""
+    #Function to parse features from GeoDataFrame in such a manner that rasterio wants them
     return [json.loads(gdf.to_json())['features'][0]['geometry']]
 
 #### Get the geometry coordinates by using the function "getFeatures"
@@ -88,39 +123,27 @@ landuse_arr_crp, out_transform = mask(landuse, coords, crop=True)
 
 ### Crop the water data
 water_arr_crp, out_transform = mask(water, coords, crop=True)
-            
+"""            
 
-
-
-
-
-
-
-
-
-
-
+with rs.open(output_name) as dst:
+    water_data=dst.read()
+    water_meta = dst.meta
+    
+with rs.open(sentinel_name) as dst:
+    sentinel =  dst.read()
+    sentinel_meta=dst.meta
+    
 # For the water bodies, you only want the map to indicate where is water and
 # where is not, therefore only 1 and 0 will be visible on map. The following
-# function is used for that
+# function is used for that. All pixels > 1 are converted to 1 (water)
 def create_mask (water_data): 
-    for i in range(0,len(water_data)):
-        for j in range(0, len(water_data)):
-            if water_data[i][j] < 1:
-                water_data[i][j] = 0
-            else:
-                water_data[i][j] = 1
-    return(water_data)
+    newdata=water_data[water_data>0]=1
+    return(newdata)
 
-water_arr_crp_bl= create_mask(water_arr_crp[0])
+
+water_arr_crp_bl= create_mask(water_data[0])
 
 plt.imshow(water_arr_crp_bl)
-
-
-
-
-
-
 
 
 # Save the rasters as tif

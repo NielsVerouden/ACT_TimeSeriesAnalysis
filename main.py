@@ -30,7 +30,7 @@ from stack_images import add_ratio
 from visualize import show_backscatter, show_histograms, visualizePrediction
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
-from train_model import GaussianNaiveBayes, RandomForest
+from train_model import GaussianNaiveBayes, RandomForest, knn, svm
 from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 
@@ -44,8 +44,8 @@ show_sentinel_histograms, show_sentinel_images = True, False
 
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
-options = ["GaussianNaiveBayes", "RandomForest"]
-preferred_model = options[1]
+options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
+preferred_model = options[-1] #Counting starts at zero !
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -85,15 +85,20 @@ X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_fol
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
 if preferred_model == "GaussianNaiveBayes":
     model = GaussianNaiveBayes(X_train,y_train)    
-    test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 
 elif preferred_model == "RandomForest":
     model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
-    test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
+    
+elif preferred_model == "K-NearestNeighbours":
+    model= knn(X_train, y_train)
 
+elif preferred_model == "SupportVectorMachine":
+    model = svm(X_train, y_train)    
+    
 else:
     raise Exception("Preferred model does not exist, please pick one of %s"%options)
-
+    
+test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 ## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list

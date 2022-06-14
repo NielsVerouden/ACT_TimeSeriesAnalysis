@@ -8,6 +8,7 @@ from pycrs.parse import from_epsg_code
 from skimage.transform import resize
 import os
 import json
+import glob
 #water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
 #sentinel_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
 #output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
@@ -52,7 +53,7 @@ def clipRaster(bounding_raster_names, raster_to_be_clipped_name, output_folder):
         output_path=os.path.join(output_folder,output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)
-        dic[bounding_raster_name]=output_path
+        dic[bounding_raster_name[-21:-11]]=output_path
         raster.close()
         boundingraster.close()
     return dic
@@ -63,7 +64,13 @@ def maskWater(combinations_dict,dest_folder,mask_value=0):
     masked_filenames=[]
     if not os.path.exists(dest_folder): os.makedirs(dest_folder)
     #Loop over each combination from the dictionary:
-    for raster_name, water_name in combinations_dict.items():
+    for date, water_name in combinations_dict.items():
+        #Look for the file in the prediction  folder
+        #that corresponds to the key/value pair in the dictionary
+        pattern = 'FloodPredictions\\FloodPrediction_%s*.tiff' % date
+        for file in glob.glob(pattern):
+            raster_name= file
+        
         with rio.open(water_name) as dst:
             water_data=dst.read()
             water_meta = dst.meta

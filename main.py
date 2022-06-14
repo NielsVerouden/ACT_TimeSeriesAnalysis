@@ -38,9 +38,13 @@ from ClipAndMask import clipRaster, maskWater
 input_folder = 'CapHaitienDownloadsApril2021'
 images_folder = 'radar_time_series'
 stacked_images_folder = 'radar_time_series_stacked'
-masked_stacked_images_folder = 'radar_time_series_stacked_masked'
+masked_predictions_folder = 'FloodPredictions_masked'
 training_folder = "TrainingData"
 waterbodies_folder = "WaterBodies"
+water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+#Important: the variable water should refer to a raster file that includes 
+# the locations of the Sentinel-1 images !
+# you can download tiff files with water bodies from ... 
 
 #Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = False, False
@@ -48,7 +52,7 @@ show_sentinel_histograms, show_sentinel_images = False, False
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
 options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
-preferred_model = options[1] #Counting starts at zero !
+preferred_model = options[0] #Counting starts at zero !
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -71,18 +75,15 @@ stacked_rasters_names = add_ratio(stacked_rasters_names, folder=stacked_images_f
 
 ##Create crops of the water bodies dataset to the extent of each sentinel image
 ## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
-water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
 water_sentinel_combis = clipRaster(stacked_rasters_names, water, waterbodies_folder)
 
-#Now mask the water bodies from each image
-masked_stacked_rasters_names = maskWater(water_sentinel_combis,masked_stacked_images_folder,mask_value=0)
 
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
-    show_histograms(masked_stacked_rasters_names)
+    show_histograms(stacked_rasters_names)
 
 if show_sentinel_images:
-    show_backscatter(masked_stacked_rasters_names)
+    show_backscatter(stacked_rasters_names)
     
 ## To be done: also add DEM to the stacks
 
@@ -113,15 +114,17 @@ test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 ## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list
 # Set majorityfilter to True to apply majority filter (more accurate but takes a few minutes)
-predictions_dict, predictions_filenames= predict(masked_stacked_rasters_names, model, training_polys, majorityfilter=False)
+predictions_dict, predictions_filenames= predict(stacked_rasters_names, model, training_polys, majorityfilter=False)
 
 ## predictions is a dictionairy containing a time series of classified maps
+#Now mask the water bodies from each prediction
+masked_predictions_names = maskWater(water_sentinel_combis,masked_predictions_folder,mask_value=100)
 
 ## STEP 3: Visualize Results
 #show prediction results of one image (uncomment):
 #visualizePrediction(prediction)
 #show all prediction results:
-visualizePrediction(predictions_dict)
+visualizePrediction(predictions_dict, dest_name=masked_predictions_folder)
 
 
 ## STEP 4: Post processing

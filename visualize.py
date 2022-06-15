@@ -24,11 +24,34 @@ def show_histograms(filenames):
 
 def show_backscatter(filenames):
     filenames_sorted = sorted(filenames)
+    # Function to normalize bands into 0.0 - 1.0 scale
+    def normalize(array):
+        array_min, array_max = array.min(), array.max()
+        return (array - array_min) / (array_max - array_min)
+    
     for id in range(0,len(filenames_sorted)):
         title = str(filenames_sorted[id][-21:-11]) #select date as title
         with rio.open(filenames_sorted[id],'r') as src:
-            show(src,title=title, transform=src.transform)
-         
+            #show(src,title=title, transform=src.transform, adjust='linear')
+            
+            #Read bands
+            vv=src.read(1)
+            vh=src.read(2)
+            ratio=src.read(3)
+
+            #Normalize values to enable RGB plotting
+            vv_norm = normalize(vv)
+            vh_norm = normalize(vh)
+            ratio_norm = normalize(ratio)
+            
+            #Stack normalized arrays
+            stck = np.dstack((vv_norm,vh_norm,ratio_norm))
+            
+            #Open new plotting device and show image
+            plt.figure()
+            plt.imshow(stck)
+            plt.suptitle(title)
+            plt.show()
 """           
 for id in range(0,len(stacked_rasters_names)):
     title = str(stacked_rasters_names[id][-21:-11]) #select date as title

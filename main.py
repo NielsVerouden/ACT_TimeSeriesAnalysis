@@ -47,12 +47,12 @@ water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
 # you can download tiff files with water bodies from ... 
 
 #Indicate whether all images and histograms need to be plotted:
-show_sentinel_histograms, show_sentinel_images = False, False
+show_sentinel_histograms, show_sentinel_images = True, True
 
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
 options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
-preferred_model = options[0] #Counting starts at zero !
+preferred_model = options[2] #Counting starts at zero !
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder

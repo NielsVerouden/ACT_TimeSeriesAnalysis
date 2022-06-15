@@ -32,7 +32,7 @@ def knn(X,y,n_neighbours=6):
     print("Fitting K-Nearest Neighbours to input data ... Takes a few minutes")
     knn = KNeighborsClassifier(n_neighbors=n_neighbours)
     knn.fit(X, y)
-    print("Training finished)")
+    print("Training finished")
     return knn
 #https://towardsdatascience.com/land-cover-classification-in-satellite-imagery-using-python-ae39dbf2929
 

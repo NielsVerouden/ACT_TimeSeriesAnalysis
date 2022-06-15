@@ -35,13 +35,14 @@ from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
 
-input_folder = 'CapHaitienDownloadsApril2021'
-images_folder = 'SentinelTimeSeries'
-stacked_images_folder = 'SentinelTimeSeriesStacked'
-masked_predictions_folder = 'FloodPredictions_masked'
-training_folder = "TrainingData"
-waterbodies_folder = "WaterBodies"
-water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+input_folder = './data/ChadDownloadsNovember2020'
+images_folder = './data/SentinelTimeSeries'
+stacked_images_folder = './data/SentinelTimeSeriesStacked'
+masked_predictions_folder = './data/FloodPredictions_masked'
+training_folder = "./data/TrainingData"
+waterbodies_folder = "./data/WaterBodies"
+water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
+DEM = './data/DEM'
 #Important: the variable water should refer to a raster file that includes 
 # the locations of the Sentinel-1 images !
 # you can download tiff files with water bodies from ... 

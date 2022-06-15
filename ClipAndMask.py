@@ -27,7 +27,7 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
         bounding_raster_path=os.path.join(bounding_rasters_folder,bounding_raster_name)
         boundingraster = rio.open(bounding_raster_path)
         
-        #Crop the water raster to the sentinel image:
+        #Crop the raster to the sentinel image:
         #No need for reprojection since both have the same coordinate system
         #1. Get the bounding box of the sentinel-1 image:
         bounds=boundingraster.bounds    
@@ -44,7 +44,7 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
         
         coords = getFeatures(geodf)
         
-        #Mask the raster using the bounding box of the smal raster
+        #Mask the raster using the bounding box of the smaller raster
         out_img, out_transform = mask(raster, shapes=coords, crop=True)
         
         #Get ready to save the numpy array as a geotiff: update metadata
@@ -52,7 +52,12 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
                            "width": out_img.shape[2], "transform": out_transform,
                           "crs": from_epsg_code(epsg_code).to_proj4()})
         
-        output_name="WaterBodies_CorrespondinTo_%s.tiff"%bounding_raster_name[0:10]
+        # Check if the input file is a DEM or a water dataset to save the cropped
+        # tif with the right name
+        if raster
+        
+        
+        output_name="WaterBodies_CorrespondingTo_%s.tiff"%bounding_raster_name[0:10]
         output_path=os.path.join(output_folder,output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)

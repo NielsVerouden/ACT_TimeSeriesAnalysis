@@ -1,3 +1,6 @@
+"""
+not used
+
 import rasterio as rio
 from rasterio.plot import show
 import os
@@ -89,7 +92,7 @@ def add_ratio(stacked_names, folder='radar_time_series_stacked'):
     return(stacked_names)
 
 ## credit: https://automating-gis-processes.github.io/CSC18/lessons/L6/raster-calculations.html
-"""
+
 stacked_rasters_names = stack_images(list_of_images, input_name=images_folder, output_name=stacked_images_folder)
 
 for stack in stacked_rasters_names:

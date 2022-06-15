@@ -16,18 +16,20 @@ from rasterio.plot import show_hist
 from rasterio.windows import Window
 from matplotlib import pyplot as plt
 """
-def predict(image_path, model, training_polys, dest_name="FloodPredictions", 
+def predict(folder, model, training_polys, dest_name="FloodPredictions", 
             majorityfilter=False, size=3):
     
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     #if image_path is a list, we have to predict for each file in the list,
     #    else we predict only once
-    image_path = image_path.split() if type(image_path) != list else image_path
+    #image_path = image_path.split() if type(image_path) != list else image_path
     predictions = {} #dictionary that will contain dates and corresponding numpy arrays
     preds_filenames = [] #list that will contain the file locations of tiff files
     
-    for file in image_path:
-        with rio.open(file) as src:
+    input_files = os.listdir(folder)
+    for file in input_files:
+        path = os.path.join(folder,file)
+        with rio.open(path) as src:
             # may need to reduce this image size if your kernel crashes, takes a lot of memory
             img = src.read()
             kwargs = src.meta
@@ -52,7 +54,7 @@ def predict(image_path, model, training_polys, dest_name="FloodPredictions",
         
         
         ####
-        ##filter the prediction result to remove isolated spots 
+        ##filter the prediction result to remove isolated spots (takes quite some time)
         if majorityfilter:
             print("Applying majority filter ... \nMight take a few minutes.")
             #filter_function takes an array of x values and returns an array of the same size only 
@@ -69,9 +71,9 @@ def predict(image_path, model, training_polys, dest_name="FloodPredictions",
             class_prediction = function(class_prediction)
             #credit: https://enmap-box.readthedocs.io/en/latest/usr_section/usr_cookbook/generic_filter.html
 
-        predictions[file[-21:-11]]=class_prediction #key=date, value=prediction array
+        predictions[file[0:10]]=class_prediction #key=date, value=prediction array
         
-        outputfilename = "FloodPrediction_%s.tiff" %file[-21:-11]
+        outputfilename = "FloodPrediction_%s.tiff" %file[0:10]
         outputpath = os.path.join(dest_name,outputfilename)
         with rio.open(outputpath, 'w', **kwargs) as dst:
             dst.write_band(1, class_prediction.astype(rio.float32))

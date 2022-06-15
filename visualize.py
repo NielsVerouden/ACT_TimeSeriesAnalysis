@@ -5,12 +5,17 @@ import matplotlib.pyplot as plt
 import numpy as np
 from rasterio.plot import reshape_as_image
 import glob
+import os
 
-def show_histograms(filenames):
+def show_histograms(folder):
+    filenames = os.listdir(folder)
     filenames_sorted = sorted(filenames)
-    for id in range(0,len(filenames_sorted)):
-        title = str(filenames_sorted[id][-21:-11])
-        with rio.open(filenames_sorted[id],'r') as src:
+    
+    for id, filename in enumerate(filenames_sorted):
+        filepath=os.path.join(folder, filename)
+        title = str(filename[0:10]) #date
+        
+        with rio.open(filepath,'r') as src:
 
             fig, axhist = plt.subplots(1, 1, figsize=(20, 20))
             show_hist(src, ax=axhist, bins=100, lw=0.0, stacked=False, 
@@ -18,20 +23,22 @@ def show_histograms(filenames):
     
             axhist.set_title(title, size=60)
             axhist.legend(list(src.descriptions), prop={'size': 40})
-            #axhist.set_ylim([0,0.01])
+            axhist.set_ylim([0,0.00005])
             plt.show()
             #optional: add code to save histograms in a folder
 
-def show_backscatter(filenames):
+def show_backscatter(folder):
+    filenames = os.listdir(folder)
     filenames_sorted = sorted(filenames)
     # Function to normalize bands into 0.0 - 1.0 scale
     def normalize(array):
         array_min, array_max = array.min(), array.max()
         return (array - array_min) / (array_max - array_min)
     
-    for id in range(0,len(filenames_sorted)):
-        title = str(filenames_sorted[id][-21:-11]) #select date as title
-        with rio.open(filenames_sorted[id],'r') as src:
+    for id, filename in enumerate(filenames_sorted):
+        filepath=os.path.join(folder, filename)
+        title = str(filename[0:10]) #select date as title
+        with rio.open(filepath,'r') as src:
             #show(src,title=title, transform=src.transform, adjust='linear')
             
             #Read bands
@@ -60,12 +67,12 @@ for id in range(0,len(stacked_rasters_names)):
 """
 
 ######Visualize:
-def visualizePrediction(masked_predictions_names):
+def visualizePrediction(masked_predictions_names, input_folder):
     for filename in masked_predictions_names:
-        date=filename[-15:-5]
-        
+        date=filename[41:51]
+
         #search for files in the directory with stacked images
-        pattern = 'radar_time_series_stacked/*%s*.tiff' % date
+        pattern = '%s/*%s*.tiff' % (input_folder,date)
         for file in glob.glob(pattern):
             image_path = file
         

@@ -13,16 +13,19 @@ import glob
 #sentinel_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
 #output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
 
-def clipRaster(bounding_raster_names, raster_to_be_clipped_name, output_folder):
+def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder):
     dic = {}
-    for bounding_raster_name in bounding_raster_names:
-    ## Open the big raster and save metadata for later
+    #for bounding_raster_name in bounding_raster_names:
+    for bounding_raster_name in os.listdir(bounding_rasters_folder):
+        
+        ## Open the big raster and save metadata for later
         raster = rio.open(raster_to_be_clipped_name)
         raster_meta = raster.meta.copy()
         epsg_code = int(raster.crs.data['init'][5:])
     
         ## Open small raster
-        boundingraster = rio.open(bounding_raster_name)
+        bounding_raster_path=os.path.join(bounding_rasters_folder,bounding_raster_name)
+        boundingraster = rio.open(bounding_raster_path)
         
         #Crop the water raster to the sentinel image:
         #No need for reprojection since both have the same coordinate system
@@ -49,11 +52,11 @@ def clipRaster(bounding_raster_names, raster_to_be_clipped_name, output_folder):
                            "width": out_img.shape[2], "transform": out_transform,
                           "crs": from_epsg_code(epsg_code).to_proj4()})
         
-        output_name="WaterBodies_CorrespondinTo_%s.tiff"%bounding_raster_name[-21:-11]
+        output_name="WaterBodies_CorrespondinTo_%s.tiff"%bounding_raster_name[0:10]
         output_path=os.path.join(output_folder,output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)
-        dic[bounding_raster_name[-21:-11]]=output_path
+        dic[bounding_raster_name[0:10]]=output_path
         raster.close()
         boundingraster.close()
     return dic
@@ -106,7 +109,7 @@ def maskWater(combinations_dict,dest_folder,mask_value=0):
             raster[i][water_binary_resized[0]==1]=mask_value
         
         # Save the rasters as tif
-        output_name="MaskedPrediction_%s.tiff"%raster_name[-15:-5]
+        output_name="MaskedPrediction_%s.tiff"%raster_name[33:44]
         outputpath = os.path.join(dest_folder,output_name)
         with rio.open(outputpath, 'w', **raster_meta) as dst:
             dst.write(raster.astype(rio.float32))

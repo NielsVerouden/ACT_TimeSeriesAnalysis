@@ -35,7 +35,7 @@ from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
 
-input_folder = 'ChadDownloadsNovember2020'
+input_folder = 'CapHaitienDownloadsApril2021'
 images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
 masked_predictions_folder = 'FloodPredictions_masked'

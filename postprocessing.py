@@ -5,26 +5,35 @@ import rasterio as rio
 import numpy as np
 from rasterio.plot import reshape_as_image
 from matplotlib import pyplot as plt
+import matplotlib
 
 def createFrequencyMap(filenames):
-    
-    #Simple frequency map that does not distinguish flooded cities from flooded land areas:
+   
     for filename in filenames:
         with rio.open(filename) as src:
-            combined_flooding = src.read()
-            flooded_urban = src.read()
-            flooded_land = src.read()
             
+            flood_predictions= src.read()
+
+            if 'frequencymapComb' not in locals(): 
+                frequencymapComb = np.zeros_like(flood_predictions)
+            if 'frequencymapUrban' not in locals(): 
+                frequencymapUrban = np.zeros_like(flood_predictions)
+            if 'frequencymapLand' not in locals(): 
+                frequencymapLand = np.zeros_like(flood_predictions)
+                
             #Create binary rasters where 0 is non-flooded, 1 is flooded
             #1=flooded urban areas:
-            flooded_urban[flooded_urban!=2] = 0
-            flooded_urban[flooded_urban==2]=1
+            frequencymapUrban[flood_predictions==2] += 1
+            frequencymapUrban[flood_predictions==100] = 100
             
             #1=flooded land (land is fields, agriculture, etc.):
-            flooded_land[flooded_land!=1] = 0
+            frequencymapLand[flood_predictions==1] += 1
+            frequencymapLand[flood_predictions==100] = 100
             
             #1=flooded urban areas or land:
-            combined_flooding[combined_flooding > 0] = 1
+            frequencymapComb[flood_predictions==1] += 1
+            frequencymapComb[flood_predictions==2] += 1
+            frequencymapComb[flood_predictions==100] = 100
             
             kwargs = src.meta
             kwargs.update(
@@ -32,16 +41,6 @@ def createFrequencyMap(filenames):
                     count=1,
                     compress='lzw')
             
-            if 'frequencymapComb' not in locals(): 
-                frequencymapComb = np.zeros_like(combined_flooding)
-            if 'frequencymapUrban' not in locals(): 
-                frequencymapUrban = np.zeros_like(combined_flooding)
-            if 'frequencymapLand' not in locals(): 
-                frequencymapLand = np.zeros_like(combined_flooding)
-                
-            frequencymapComb = np.add(frequencymapComb,combined_flooding)
-            frequencymapUrban = np.add(frequencymapUrban,flooded_urban)
-            frequencymapLand = np.add(frequencymapLand,flooded_land)
             
     #very simple visualization:
     frequencymapComb_plot = reshape_as_image(frequencymapComb)
@@ -53,12 +52,21 @@ def createFrequencyMap(filenames):
     
     #Display each frequency map:
     for title, freq_map in maps.items():
+        permanent_water=100
+        masked_array = np.ma.masked_where(freq_map == permanent_water, freq_map)
+        
+        #Define a colormap for the plotted image
+        cmap = matplotlib.cm.plasma  
+        #Define a colormap for permanent water (aqua = light blue)
+        cmap.set_bad(color='aqua')
+        
         plt.figure()
-        c = plt.imshow(freq_map, cmap='jet')
+        c = plt.imshow(masked_array, cmap=cmap)
         plt.colorbar(c)
         plt.suptitle(title)
         plt.show()
         
     return(maps)
 
+#credit: https://stackoverflow.com/questions/37719304/python-imshow-set-certain-value-to-defined-color
 

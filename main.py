@@ -124,13 +124,13 @@ masked_predictions_names = maskWater(water_sentinel_combis,masked_predictions_fo
 #show prediction results of one image (uncomment):
 #visualizePrediction(prediction)
 #show all prediction results:
-visualizePrediction(predictions_dict, dest_name=masked_predictions_folder)
+visualizePrediction(masked_predictions_names)
 
 
 ## STEP 4: Post processing
 ## Create a flood frequency map based on the time series
 ## How often is each pixel flooded?
 ## Create nice visualization
-frequencymaps = createFrequencyMap(predictions_filenames)
+frequencymaps = createFrequencyMap(masked_predictions_names)
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time

@@ -37,12 +37,17 @@ for id in range(0,len(stacked_rasters_names)):
 """
 
 ######Visualize:
-def visualizePrediction(predictions):
-    for date, prediction in predictions.items():
+def visualizePrediction(masked_predictions_names):
+    for filename in masked_predictions_names:
+        date=filename[-15:-5]
+        
         #search for files in the directory with stacked images
         pattern = 'radar_time_series_stacked/*%s*.tiff' % date
         for file in glob.glob(pattern):
             image_path = file
+        
+        with rio.open(filename) as prediction_src:
+            prediction=prediction_src.read()
             
         with rio.open(image_path) as src:
             # may need to reduce this image size if your kernel crashes, takes a lot of memory
@@ -50,6 +55,7 @@ def visualizePrediction(predictions):
         
         # Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
         reshaped_img = reshape_as_image(img)
+        reshaped_prediction = reshape_as_image(prediction)
         
         def color_stretch(image, index):
             colors = image[:, :, index].astype(np.float64)
@@ -58,13 +64,14 @@ def visualizePrediction(predictions):
             return colors
             
         # find the highest pixel value in the prediction image
-        n = int(np.max(prediction))
+        n = int(np.max(reshaped_prediction))
         
         # next setup a colormap for our map
         colors = dict((
             (0, (139,69,19, 255)),      # Brown - dry area
             (1, (48, 156, 214, 255)),    # Blue - flooded
             (2, (96, 19, 134, 255)),    # Purple - flooded urban
+            (100,(206, 224, 196, 255))  #Lime - water
         ))
         
         # Put 0 - 255 as float 0 - 1
@@ -82,7 +89,7 @@ def visualizePrediction(predictions):
         img_stretched = color_stretch(reshaped_img, [0,1,2])
         axs[0].imshow(img_stretched)
         
-        axs[1].imshow(prediction, cmap=cmap, interpolation='none')
+        axs[1].imshow(reshaped_prediction, cmap=cmap, interpolation='none')
         fig.suptitle(date)
         fig.show()
     plt.close(fig)

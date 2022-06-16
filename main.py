@@ -37,10 +37,10 @@ from ClipAndMask import clipRaster, maskWater
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 DEM_folder = "./data/DEM"
-human_settlement_folder = "GlobalHumanSettlement"
-training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
+human_settlement_folder = "./data/GlobalHumanSettlement"
+training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
 waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
 
 # These names are used later to store the files

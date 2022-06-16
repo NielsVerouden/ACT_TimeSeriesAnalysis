@@ -16,7 +16,7 @@ def load_data(input_name, dest_name, stack_dest_name):
 # stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     if not os.path.exists(stack_dest_name): os.makedirs(stack_dest_name)
-    if not os.path.exists("TemporaryFiles"): os.makedirs("TemporaryFiles")
+
     extension = ".zip"
     #image_names = []
     dates=[] #initialize list of dates

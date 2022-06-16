@@ -69,8 +69,8 @@ for id in range(0,len(stacked_rasters_names)):
 ######Visualize:
 def visualizePrediction(masked_predictions_names, input_folder):
     for filename in masked_predictions_names:
-        date=filename[41:51]
-
+        date=filename[48:58]
+        
         #search for files in the directory with stacked images
         pattern = '%s/*%s*.tiff' % (input_folder,date)
         for file in glob.glob(pattern):

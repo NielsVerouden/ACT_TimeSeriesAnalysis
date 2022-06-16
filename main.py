@@ -23,26 +23,25 @@
 ## The images_folder is automatically created by the script if it is not yet 
 ## present in the current working directory.
 
-from load_data_from_zip_folders import load_data
-from visualize import show_backscatter, show_histograms, visualizePrediction
-from speckle_filter import apply_lee_filter
-from load_training_data import loadTrainingData
-from train_model import GaussianNaiveBayes, RandomForest, knn, svm
-from predict import predict, getAccuracy_ConfMatrix
-from postprocessing import createFrequencyMap
-from ClipAndMask import clipRaster, maskWater
-from loadDEM_GHS import addDEM_GHS
+from py.load_data_from_zip_folders import load_data
+from py.visualize import show_backscatter, show_histograms, visualizePrediction
+from py.speckle_filter import apply_lee_filter
+from py.load_training_data import loadTrainingData
+from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
+from py.predict import predict, getAccuracy_ConfMatrix
+from py.postprocessing import createFrequencyMap
+from py.ClipAndMask import clipRaster, maskWater
+from py.loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
 input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
-ghs_folder = "./data/GlobalHumanSettlement" #Containing a zipfile which has a tile of the GHS dataset (https://ghsl.jrc.ec.europa.eu/download.php?ds=pop) use 9 arc resolution and WGS 84
+ghs_folder = "./data/GHS" #Containing a zipfile which has a tile of the GHS dataset
 water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = './data/DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
 DEM_folder = "./data/DEM"
-
 # These names are used later to store the files
 waterbodies_name = "WaterBodiesCrop"
 DEM_name = "DEMCrop"
@@ -52,6 +51,11 @@ masked_predictions_folder = './data/FloodPredictions_masked'
 images_folder = './data/SentinelTimeSeries'
 stacked_images_folder = './data/SentinelTimeSeriesStacked'
 stacked_images_folder_incl_ghs='./data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
+
+#When creating training data:
+#input_folder="./data/ChadDownloadsNovember2020"
+#ghs_folder="./data/GHS_Chad"
+#DEM_folder="./data/DEM_Chad"
 
 # Open water and DEM names
 ## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
@@ -68,14 +72,14 @@ show_sentinel_histograms, show_sentinel_images = True, True
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
 options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
-preferred_model = options[0] #Counting starts at zero !
+preferred_model = options[1] #Counting starts at zero !
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
 load_data(input_folder, images_folder,stacked_images_folder)
 #This function stores all stacked rasters in the folder stacked_images_folder
-addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder)
+addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder, DEM_folder)
 
 
 
@@ -92,10 +96,10 @@ DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
 
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
-    show_histograms(stacked_images_folder)
+    show_histograms(stacked_images_folder_incl_ghs)
 
 if show_sentinel_images:
-    show_backscatter(stacked_images_folder)
+    show_backscatter(stacked_images_folder_incl_ghs)
 
 
 ##STEP 3: Load training data and train a supervised classification model
@@ -125,7 +129,7 @@ test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 ## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list
 # Set majorityfilter to True to apply majority filter (more accurate but takes a few minutes)
-predictions_dict, predictions_filenames= predict(stacked_images_folder, model, training_polys, majorityfilter=False)
+predictions_dict, predictions_filenames= predict(stacked_images_folder_incl_ghs, model, training_polys, majorityfilter=False)
 
 ## predictions is a dictionairy containing a time series of classified maps
 #Now mask the water bodies from each prediction

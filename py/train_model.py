@@ -10,6 +10,7 @@ def GaussianNaiveBayes(X,y):
     print("Fitting GaussianNaiveBayes Classifier to input data ... ")
     gnb = GaussianNB()
     gnb.fit(X, y)
+    print(X.shape)
     return gnb
 #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
 #https://towardsdatascience.com/land-cover-classification-in-satellite-imagery-using-python-ae39dbf2929

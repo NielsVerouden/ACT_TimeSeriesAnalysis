@@ -39,7 +39,8 @@ def predict(folder, model, training_polys, dest_name="FloodPredictions",
                     compress='lzw')
         # Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
         reshaped_img = reshape_as_image(img)
-        class_prediction = model.predict(reshaped_img.reshape(-1, 3))
+        #reshaped_img=img.reshape(-1,5)
+        class_prediction = model.predict(reshaped_img.reshape(-1, 5))
         # Reshape our classification map back into a 2D matrix so we can visualize it
         class_prediction = class_prediction.reshape(reshaped_img[:, :, 0].shape)
         

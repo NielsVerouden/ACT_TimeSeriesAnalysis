@@ -25,7 +25,7 @@ def loadTrainingData(training_folder):
     #Retrieve all folders in the training_folder
     trainingDates = os.listdir(training_folder)
     
-    X = np.array([], dtype=np.int8).reshape(0,3) # pixels for training
+    X = np.array([], dtype=np.int8).reshape(0,5) # pixels for training
     y = np.array([], dtype=np.string_) # labels for training
     
     #For each folder, we are going to extract the pixel values in the training polygons:
@@ -37,9 +37,8 @@ def loadTrainingData(training_folder):
                                 #If you get an CRSError: uninstall geopandas and pyproj and reinstall them in your env
                                 #should solve this
             #Retrieve the pilepath to get the raster file (used later to open the file)                   
-            if file.endswith(".tiff"):
+            if file.endswith(".tiff") and file.startswith("TrainingSentinel"):
                 sentinel_location = os.path.join(training_folder,date_folder,file)
-                
         #generate a list of shapely geometries
         geoms = polys.geometry.values 
         
@@ -52,11 +51,11 @@ def loadTrainingData(training_folder):
                 # the mask function returns an array of the raster pixels within this feature
                 out_image, out_transform = mask(src, feature, crop=True) 
                 # eliminate all the pixels with 0 values for all 3 bands - AKA not actually part of the shapefile
-                out_image_trimmed = out_image[:,~np.all(out_image == 0, axis=0)]
+                #out_image_trimmed = out_image[:,~np.all(out_image == 0, axis=0)]
                 # eliminate all the pixels with 255 values for all 3 bands - AKA not actually part of the shapefile
-                out_image_trimmed = out_image_trimmed[:,~np.all(out_image_trimmed == 255, axis=0)]
+                #out_image_trimmed = out_image_trimmed[:,~np.all(out_image_trimmed == 255, axis=0)]
                 # reshape the array to [pixel count, bands]
-                out_image_reshaped = out_image_trimmed.reshape(-1, band_count)
+                out_image_reshaped = out_image.reshape(-1, band_count)
                 
                 # append the labels to the y array
                 y = np.append(y,[polys["Label"][index]] * out_image_reshaped.shape[0]) 
@@ -64,14 +63,14 @@ def loadTrainingData(training_folder):
                 X = np.vstack((X,out_image_reshaped))   
        
         # What are our classification labels?
-        labels = np.unique(polys["Label"])
-        print('The training data include {n} classes: {classes}\n'.format(n=labels.size, 
+    labels = np.unique(polys["Label"])
+    print('The training data include {n} classes: {classes}\n'.format(n=labels.size, 
                                                                           classes=labels))
-        """
-        # We will need a "X" matrix containing our features, and a "y" array containing our labels
-        print('Our X matrix is sized: {sz}'.format(sz=X.shape))
-        print('Our y array is sized: {sz}'.format(sz=y.shape))
-        """
+    """
+    # We will need a "X" matrix containing our features, and a "y" array containing our labels
+    print('Our X matrix is sized: {sz}'.format(sz=X.shape))
+    print('Our y array is sized: {sz}'.format(sz=y.shape))
+    """
     #After the for-loop, we have two arrays: X and y
     #X has all pixel values of the 3 bands
     #y has the labels per pixels

@@ -20,8 +20,8 @@
 ## corresponds to the title of the variable input_folder.
 ## This folder should contain several zip folders: each zip folder should contain 
 ## a VV and VH Sentinel-1 image downloaded from sentinel hub.
-## The images_folder is automatically created by the script if it is not yet present in the 
-## current working directory.
+## The images_folder is automatically created by the script if it is not yet 
+## present in the current working directory.
 
 from load_data_from_zip_folders import load_data
 #from load_images import load_images
@@ -35,7 +35,9 @@ from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
 
+#### Create folders and load file names
 #These folders should exist in your wd 
+<<<<<<< HEAD
 input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
 water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
@@ -43,15 +45,34 @@ DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-
 human_settlement_name = "18Q_Prob.tif"
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 human_settlement_folder = "GlobalHumanSettlement"
+=======
+input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+DEM_folder = "./data/DEM"
+human_settlement_folder = "./data/GlobalHumanSettlement"
+training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
+waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+
+# These names are used later to store the files
+waterbodies_name = "WaterBodiesCrop"
+DEM_name = "DEMCrop"
+>>>>>>> 38262ff102117153210e6d9f2c17f6ae2cbcab7a
 
 #These folders are created by the script:
+masked_predictions_folder = 'FloodPredictions_masked'
 images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
-masked_predictions_folder = 'FloodPredictions_masked'
-waterbodies_name = "WaterBodiesCrop"
 
-# you can download tiff files with water bodies/DEM from ... 
+# Open water and DEM names
+## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
+## (European Commission’s Joint Research Centre, 2022). https://global-surface-water.appspot.com/download 
+## DEM data can be downloaded as tiff files from: EO Browser (2022). 
+## EO Browser, Home, Explore, derived from, https://www.sentinel-hub.com/explore/eobrowser/
+## More extensive explanation of downloading and storing data is in the file "TrainingDataProcedures.docx"
+## BE AWARE that some tiff files are stored as '.tif' and some as '.tiff'
+water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
+DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 
+### Indicate preferences
 #Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = True, True
 
@@ -63,24 +84,24 @@ preferred_model = options[0] #Counting starts at zero !
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
+<<<<<<< HEAD
 load_data(input_folder, images_folder,stacked_images_folder)
 #This function stores all stacked rasters in the folder stacked_images_folder
+=======
+load_data(input_folder, images_folder,stacked_images_folder, human_settlement_folder)
+#This function stores all stacked rasters in the folder "stacked_images_folder"
+>>>>>>> 38262ff102117153210e6d9f2c17f6ae2cbcab7a
 
-## To be done: load a local subset of a global DEM and global water bodies dataset to aid in the classification
-#Load DEM from a folder and crop to the extent of the radar image ...
-# DEM will also have to be resampled so that it matches the radar images
-#Load water bodies from a folder and crop to the extent of the radar image ...
+## Load a local subset of a global DEM and water dataset to aid in the classification
+## Create crops of the DEM and water bodies dataset to the extent of each sentinel image
+## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
+water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
+DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
 
 
 ## STEP 2: Process data 
 ## If needed: speckle filter ... 
 #list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
-
-
-##Create crops of the water bodies dataset to the extent of each sentinel image
-## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
-water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
-
 
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
@@ -88,12 +109,10 @@ if show_sentinel_histograms:
 
 if show_sentinel_images:
     show_backscatter(stacked_images_folder)
-    
-## To be done: also add DEM to the stacks
+
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
-## To be done: use global DEM as fourth band to aid in the classification
 X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
 
 #Train a Gaussian Naive Bayes model

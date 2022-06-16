@@ -35,17 +35,20 @@ from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
 
-input_folder = './data/ChadDownloadsNovember2020'
-images_folder = './data/SentinelTimeSeries'
-stacked_images_folder = './data/SentinelTimeSeriesStacked'
-masked_predictions_folder = './data/FloodPredictions_masked'
-training_folder = "./data/TrainingData"
-waterbodies_folder = "./data/WaterBodies"
-water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff"
-DEM = './data/DEM'
-#Important: the variable water should refer to a raster file that includes 
-# the locations of the Sentinel-1 images !
-# you can download tiff files with water bodies from ... 
+#These folders should exist in your wd 
+input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
+water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
+DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
+
+#These folders are created by the script:
+images_folder = 'SentinelTimeSeries'
+stacked_images_folder = 'SentinelTimeSeriesStacked'
+masked_predictions_folder = 'FloodPredictions_masked'
+waterbodies_name = "WaterBodiesCrop"
+
+# you can download tiff files with water bodies/DEM from ... 
 
 #Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = True, True
@@ -74,7 +77,7 @@ load_data(input_folder, images_folder,stacked_images_folder)
 
 ##Create crops of the water bodies dataset to the extent of each sentinel image
 ## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
-water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder)
+water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
 
 
 #Show some simple histograms and plot the images, if specified in line 40:

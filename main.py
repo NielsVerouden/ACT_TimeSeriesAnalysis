@@ -43,12 +43,14 @@ human_settlement_folder = "GlobalHumanSettlement"
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
 
+# These names are used later to store the files
+waterbodies_name = "WaterBodiesCrop"
+DEM_name = "DEMCrop"
+
 #These folders are created by the script:
 masked_predictions_folder = 'FloodPredictions_masked'
 images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
-waterbodies_name = "WaterBodiesCrop"
-DEM_name = "DEMCrop"
 
 # Open water and DEM names
 ## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
@@ -73,29 +75,18 @@ preferred_model = options[0] #Counting starts at zero !
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
 load_data(input_folder, images_folder,stacked_images_folder, human_settlement_folder)
-#This function stores all stacked rasters in the folder stacked_images_folder
+#This function stores all stacked rasters in the folder "stacked_images_folder"
 
-## To be done: load a local subset of a global DEM and global water bodies dataset to aid in the classification
-#Load DEM from a folder and crop to the extent of the radar image ...
-## Crop the DEM to the same extent
+## Load a local subset of a global DEM and water dataset to aid in the classification
+## Create crops of the DEM and water bodies dataset to the extent of each sentinel image
+## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
+water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
 DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
-
-# DEM will also have to be resampled so that it matches the radar images
-#Load water bodies from a folder and crop to the extent of the radar image ...
-clipRaster()
 
 
 ## STEP 2: Process data 
 ## If needed: speckle filter ... 
 #list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
-
-
-##Create crops of the water bodies dataset to the extent of each sentinel image
-## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
-water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
-
-
-
 
 ## To be done: also add DEM to the stacks
 

@@ -20,8 +20,8 @@
 ## corresponds to the title of the variable input_folder.
 ## This folder should contain several zip folders: each zip folder should contain 
 ## a VV and VH Sentinel-1 image downloaded from sentinel hub.
-## The images_folder is automatically created by the script if it is not yet present in the 
-## current working directory.
+## The images_folder is automatically created by the script if it is not yet 
+## present in the current working directory.
 
 from load_data_from_zip_folders import load_data
 #from load_images import load_images
@@ -37,19 +37,22 @@ from ClipAndMask import clipRaster, maskWater
 
 #These folders should exist in your wd 
 input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
-waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
 DEM_folder = "./data/DEM"
-water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
-training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 human_settlement_folder = "GlobalHumanSettlement"
+training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
+waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+
 
 #These folders are created by the script:
+masked_predictions_folder = 'FloodPredictions_masked'
 images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
-masked_predictions_folder = 'FloodPredictions_masked'
 waterbodies_name = "WaterBodiesCrop"
 DEM_name = "DEMCrop"
+
+# Open water and DEM names
+water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
+DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 
 # you can download tiff files with water bodies/DEM from ... 
 

@@ -9,12 +9,14 @@ import glob
 import rasterio as rio
 import numpy as np
 
-def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=None):
+
+def load_data(input_name, dest_name, stack_dest_name):
 #input_name =  folder containing multiple zip folders
 # dest_name =  destination folder of files from zip folders
 # stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     if not os.path.exists(stack_dest_name): os.makedirs(stack_dest_name)
+    if not os.path.exists("TemporaryFiles"): os.makedirs("TemporaryFiles")
     extension = ".zip"
     #image_names = []
     dates=[] #initialize list of dates
@@ -34,26 +36,8 @@ def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=No
                 #extract image to destination folder
                 zip_ref.extract( zipinfo, dest_name)
             zip_ref.close() # close file
-            #os.remove(file_name) # delete zipped file 
-     
-    #Unzip human settlement layer from human_settlement_folder:
-    if human_settlement_folder is not None:
-        for item in os.listdir(human_settlement_folder):
-            if item.endswith(extension):
-                file_name=os.path.join(human_settlement_folder,item)
-                zip_ref=ZipFile(file_name)
-                zipfilenames=zip_ref.namelist()
-                for zipname in zipfilenames:
-                    if zipname.endswith(".tif"):
-                        zip_ref.extract(zipname, human_settlement_folder)
-                zip_ref.close()
-        
-        #Now load the human settlement raster:
-        cities_path=os.path.join(human_settlement_folder,"GHS_BUILT_LDS2014_GLOBE_R2018A_54009_250_V2_0.tiff")
-        with rio.open(cities_path, "r") as dst:
-            cities_meta=dst.meta
-            cities = dst.read(1)
-            
+            #os.remove(file_name) # delete zipped file    
+
     #Now load the files with rasterio and stack the vv and vh files of the same dates together 
     # with the calculated vv/vh ratio
     for date in dates:
@@ -62,7 +46,7 @@ def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=No
         
         vhname = '%s*_VH_*.tiff' % date
         vhpattern = os.path.join(dest_name,vhname)
-        
+                
         #Look for the vv and vh files for each date using global pattern
         for file in glob.glob(vvpattern):
             image_path_vv = file
@@ -78,7 +62,7 @@ def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=No
         with rio.open(image_path_vh,"r") as vh:
             vh_data=vh.read(1)
         
-        #Calculate ratio as third band:
+              #Calculate ratio as third band:
         #np.seterr(divide='ignore', invalid='ignore')
         vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
         check = np.logical_or ( vv_data > 0, vh_data > 0 )
@@ -99,5 +83,30 @@ def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=No
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
     return
 
-
+    """
+    #Not needed with the GHS data we use now ~ 
+    with rio.open(cities_path, "r") as ghs:
+        cities_meta=ghs.meta.copy()
+        dstCrs = {'init': 'EPSG:4326'} #WGS84
+        
+        transform, width, height = calculate_default_transform(
+            ghs.crs, dstCrs, ghs.width, ghs.height, *ghs.bounds)
+        cities_meta.update({
+            'crs': dstCrs,
+            'transform': transform,
+            'width': width,
+            'height': height})
+        cities_reproj_name= "Reprojected_GHS_%s" %human_settlement_file
+        cities_reproj_path = os.path.join(human_settlement_folder,cities_reproj_name)
+        #Open destination file for reprojected raster
+        with rio.open(cities_reproj_path, 'w', **cities_meta) as ghs_reproj:
+            reproject(
+                source=rio.band(ghs, 1),
+                destination=rio.band(ghs_reproj, 1),
+                #src_transform=srcRst.transform,
+                src_crs=ghs.crs,
+                #dst_transform=transform,
+                dst_crs=dstCrs,
+                resampling=Resampling.nearest)
+    """
     

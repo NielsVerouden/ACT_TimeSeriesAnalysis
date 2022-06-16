@@ -9,16 +9,16 @@ import glob
 import rasterio as rio
 import numpy as np
 
-def load_data(input_name, dest_name, stack_dest_name):
+def load_data(input_name, dest_name, stack_dest_name, human_settlement_folder=None):
 #input_name =  folder containing multiple zip folders
 # dest_name =  destination folder of files from zip folders
 # stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     if not os.path.exists(stack_dest_name): os.makedirs(stack_dest_name)
     extension = ".zip"
-    image_names = []
+    #image_names = []
     dates=[] #initialize list of dates
-    #Unzip images to a new folder
+    #Unzip files from input_name to a new folder
     for item in os.listdir(input_name): # loop through items in dir
         if item.endswith(extension): # check for ".zip" extension
             file_name =  os.path.join(input_name, item)  # get full path of files
@@ -30,11 +30,29 @@ def load_data(input_name, dest_name, stack_dest_name):
                 if date not in dates: dates.append(date) #append date to the list of unique dates
                 info = zipinfo.filename[-79:]
                 zipinfo.filename = date + '_' + info
-                image_names.append(zipinfo.filename)
+                #image_names.append(zipinfo.filename)
                 #extract image to destination folder
                 zip_ref.extract( zipinfo, dest_name)
             zip_ref.close() # close file
             #os.remove(file_name) # delete zipped file 
+     
+    #Unzip human settlement layer from human_settlement_folder:
+    if human_settlement_folder is not None:
+        for item in os.listdir(human_settlement_folder):
+            if item.endswith(extension):
+                file_name=os.path.join(human_settlement_folder,item)
+                zip_ref=ZipFile(file_name)
+                zipfilenames=zip_ref.namelist()
+                for zipname in zipfilenames:
+                    if zipname.endswith(".tif"):
+                        zip_ref.extract(zipname, human_settlement_folder)
+                zip_ref.close()
+        
+        #Now load the human settlement raster:
+        cities_path=os.path.join(human_settlement_folder,"GHS_BUILT_LDS2014_GLOBE_R2018A_54009_250_V2_0.tiff")
+        with rio.open(cities_path, "r") as dst:
+            cities_meta=dst.meta
+            cities = dst.read(1)
             
     #Now load the files with rasterio and stack the vv and vh files of the same dates together 
     # with the calculated vv/vh ratio
@@ -79,7 +97,7 @@ def load_data(input_name, dest_name, stack_dest_name):
             dst.write_band(2,vh_data.astype(rio.float32))
             dst.write_band(3,vvvh_ratio)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
-   
+    return
 
 
     

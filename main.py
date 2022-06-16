@@ -41,6 +41,7 @@ waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
 water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
 DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
+human_settlement_folder = "GlobalHumanSettlement"
 
 #These folders are created by the script:
 images_folder = 'SentinelTimeSeries'
@@ -61,7 +62,7 @@ preferred_model = options[0] #Counting starts at zero !
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
-load_data(input_folder, images_folder,stacked_images_folder)
+load_data(input_folder, images_folder,stacked_images_folder, human_settlement_folder)
 #This function stores all stacked rasters in the folder stacked_images_folder
 
 ## To be done: load a local subset of a global DEM and global water bodies dataset to aid in the classification

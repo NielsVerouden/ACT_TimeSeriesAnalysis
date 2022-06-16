@@ -88,9 +88,6 @@ DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
 ## If needed: speckle filter ... 
 #list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
 
-## To be done: also add DEM to the stacks
-
-
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
     show_histograms(stacked_images_folder)
@@ -101,7 +98,6 @@ if show_sentinel_images:
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
-## To be done: use global DEM as fourth band to aid in the classification
 X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
 
 #Train a Gaussian Naive Bayes model

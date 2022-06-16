@@ -16,6 +16,8 @@ import glob
 
 def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder, output_name):
     dic = {}
+    if not os.path.exists(output_folder): os.makedirs(output_folder)
+
     #for bounding_raster_name in bounding_raster_names:
     for bounding_raster_name in os.listdir(bounding_rasters_folder):
         
@@ -54,8 +56,8 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
                           "crs": from_epsg_code(epsg_code).to_proj4()})
         
         # Save file in correct path
-        output_name="%s_%s.tiff"%(output_name,bounding_raster_name[0:10])
-        output_path=os.path.join(output_folder,output_name)
+        compl_output_name="%s_%s.tiff"%(output_name,bounding_raster_name[0:10])
+        output_path=os.path.join(output_folder,compl_output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)
         dic[bounding_raster_name[0:10]]=output_path

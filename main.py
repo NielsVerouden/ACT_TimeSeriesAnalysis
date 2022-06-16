@@ -40,7 +40,7 @@ waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
 ghs_folder = "./data/GHS" #Containing a zipfile which has a tile of the GHS dataset
 water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
 DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
-training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
+training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 DEM_folder = "./data/DEM"
 # These names are used later to store the files
 waterbodies_name = "WaterBodiesCrop"

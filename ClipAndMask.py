@@ -13,7 +13,8 @@ import glob
 #sentinel_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
 #output_name="WaterBodies/occurrence_80W_20Nv1_3_2020_Cropped.tiff"
 
-def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder,output_name):
+
+def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder):
     dic = {}
     #for bounding_raster_name in bounding_raster_names:
     for bounding_raster_name in os.listdir(bounding_rasters_folder):
@@ -52,10 +53,14 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
                            "width": out_img.shape[2], "transform": out_transform,
                           "crs": from_epsg_code(epsg_code).to_proj4()})
         
-        # Save the cropped tiff with the right name
-        
-        output_name="%s_%s.tiff"%(output_name,bounding_raster_name[0:10])
-        output_path=os.path.join(output_folder,output_name)
+        # Check if the input file is a DEM or a water dataset to save the cropped
+        # tif with the right name
+        if 'DEM' in raster_to_be_clipped_name:
+            output_name = "DEM_CorrespondingTO_%s.tiff"%bounding_raster_name[0:10]
+            output_path=os.path.join(output_folder,output_name)
+        else:
+            output_name="WaterBodies_CorrespondingTo_%s.tiff"%bounding_raster_name[0:10]
+            output_path=os.path.join(output_folder,output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)
         dic[bounding_raster_name[0:10]]=output_path

@@ -37,9 +37,10 @@ from ClipAndMask import clipRaster, maskWater
 
 #These folders should exist in your wd 
 input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
-waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
-water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+DEM_folder = "./data/DEM"
+water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
+DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 human_settlement_folder = "GlobalHumanSettlement"
 
@@ -48,6 +49,7 @@ images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
 masked_predictions_folder = 'FloodPredictions_masked'
 waterbodies_name = "WaterBodiesCrop"
+DEM_name = "DEMCrop"
 
 # you can download tiff files with water bodies/DEM from ... 
 
@@ -67,8 +69,12 @@ load_data(input_folder, images_folder,stacked_images_folder, human_settlement_fo
 
 ## To be done: load a local subset of a global DEM and global water bodies dataset to aid in the classification
 #Load DEM from a folder and crop to the extent of the radar image ...
+## Crop the DEM to the same extent
+DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
+
 # DEM will also have to be resampled so that it matches the radar images
 #Load water bodies from a folder and crop to the extent of the radar image ...
+clipRaster()
 
 
 ## STEP 2: Process data 
@@ -81,14 +87,18 @@ load_data(input_folder, images_folder,stacked_images_folder, human_settlement_fo
 water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
 
 
+
+
+## To be done: also add DEM to the stacks
+
+
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
     show_histograms(stacked_images_folder)
 
 if show_sentinel_images:
     show_backscatter(stacked_images_folder)
-    
-## To be done: also add DEM to the stacks
+
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured

@@ -34,19 +34,24 @@ from train_model import GaussianNaiveBayes, RandomForest, knn, svm
 from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
+from loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-<<<<<<< HEAD
 input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+#input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+
 waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
+ghs_folder = "GlobalHumanSettlement" #Containing a zipfile which has a tile of the GHS dataset (https://ghsl.jrc.ec.europa.eu/download.php?ds=pop) use 9 arc resolution and WGS 84
 water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
 DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+#water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
+#DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+
 human_settlement_name = "18Q_Prob.tif"
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 human_settlement_folder = "GlobalHumanSettlement"
-=======
-input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+
 DEM_folder = "./data/DEM"
 human_settlement_folder = "./data/GlobalHumanSettlement"
 training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
@@ -55,12 +60,13 @@ waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
 # These names are used later to store the files
 waterbodies_name = "WaterBodiesCrop"
 DEM_name = "DEMCrop"
->>>>>>> 38262ff102117153210e6d9f2c17f6ae2cbcab7a
+
 
 #These folders are created by the script:
 masked_predictions_folder = 'FloodPredictions_masked'
 images_folder = 'SentinelTimeSeries'
 stacked_images_folder = 'SentinelTimeSeriesStacked'
+stacked_images_folder_incl_ghs='SentinelTimeSeriesStacked_Incl_DEM_GHS'
 
 # Open water and DEM names
 ## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
@@ -69,8 +75,6 @@ stacked_images_folder = 'SentinelTimeSeriesStacked'
 ## EO Browser, Home, Explore, derived from, https://www.sentinel-hub.com/explore/eobrowser/
 ## More extensive explanation of downloading and storing data is in the file "TrainingDataProcedures.docx"
 ## BE AWARE that some tiff files are stored as '.tif' and some as '.tiff'
-water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 
 ### Indicate preferences
 #Indicate whether all images and histograms need to be plotted:
@@ -84,13 +88,11 @@ preferred_model = options[0] #Counting starts at zero !
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
-<<<<<<< HEAD
 load_data(input_folder, images_folder,stacked_images_folder)
 #This function stores all stacked rasters in the folder stacked_images_folder
-=======
-load_data(input_folder, images_folder,stacked_images_folder, human_settlement_folder)
-#This function stores all stacked rasters in the folder "stacked_images_folder"
->>>>>>> 38262ff102117153210e6d9f2c17f6ae2cbcab7a
+addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder)
+
+
 
 ## Load a local subset of a global DEM and water dataset to aid in the classification
 ## Create crops of the DEM and water bodies dataset to the extent of each sentinel image

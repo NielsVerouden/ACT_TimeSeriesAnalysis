@@ -8,6 +8,9 @@ from skimage.transform import resize
 import numpy as np
 
 def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder=None):
+    if not os.path.exists(output_folder): os.makedirs(output_folder)
+    #sentinel_folder should already contain stacks of vv, vh and vv/vh ratio
+    #the function will add GHS population data to the stack
     #Unzip global human settlement data
     extension=".zip"
     for item in os.listdir(GHSfolder): # loop through items in dir
@@ -45,16 +48,20 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder=None):
             
         ghs_band=ghs_data[0]
         ghs_band_resized = resize(ghs_band, (raster.shape[1], raster.shape[2]), anti_aliasing=True)      
-        ghs_band_resized = np.expand_dims(ghs_band_resized, 0)
-        
-        with rio.open(raster_name, "w") as dst:
+
+        with rio.open(raster_name, "r") as dst:
             meta=dst.meta
-            meta.update(count=4)
-            dst.write_band(4,ghs_band_resized)
-            
+            vv=dst.read(1)
+            vh=dst.read(2)
+            ratio=dst.read(3)
+        
+        meta.update(count=4)
+        filename="%s_Stack_vv_vh_vvvh_ghs.tiff"%date
+        path = os.path.join(output_folder,filename)
+        with rio.open(path,"w",**meta) as dst:
+            dst.write_band(1,vv.astype(rio.float32))
+            dst.write_band(2,vh.astype(rio.float32))
+            dst.write_band(3,ratio.astype(rio.float32))
+            dst.write_band(4, ghs_band_resized.astype(rio.float32))
+            dst.descriptions = tuple(['VV','VH','VV/VH_ratio',"Population"])
     return        
-
-
-tst = addDEM_GHS("SentinelTimeSeriesStacked", 
-           "SentinelTimeSeriesStacked_Incl_DEM_GHS",
-           "GLobalHumanSettlement")

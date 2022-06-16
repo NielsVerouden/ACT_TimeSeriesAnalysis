@@ -24,9 +24,6 @@
 ## present in the current working directory.
 
 from load_data_from_zip_folders import load_data
-#from load_images import load_images
-#from stack_images import stack_images, add_ratio
-#from stack_images import add_ratio
 from visualize import show_backscatter, show_histograms, visualizePrediction
 from speckle_filter import apply_lee_filter
 from load_training_data import loadTrainingData
@@ -38,35 +35,23 @@ from loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
-#input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
-
-waterbodies_folder = "WaterBodies" #Containing a water bodies dataset
-ghs_folder = "GlobalHumanSettlement" #Containing a zipfile which has a tile of the GHS dataset (https://ghsl.jrc.ec.europa.eu/download.php?ds=pop) use 9 arc resolution and WGS 84
-water = "WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = 'DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
-#water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
-#DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
-
-human_settlement_name = "18Q_Prob.tif"
-training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
-human_settlement_folder = "GlobalHumanSettlement"
-
-DEM_folder = "./data/DEM"
-human_settlement_folder = "./data/GlobalHumanSettlement"
-training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
+input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+ghs_folder = "./data/GlobalHumanSettlement" #Containing a zipfile which has a tile of the GHS dataset (https://ghsl.jrc.ec.europa.eu/download.php?ds=pop) use 9 arc resolution and WGS 84
+water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
+DEM = './data/DEM/DEM.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+training_folder = "./data/TrainingData" #Containing training data (check load_training_data for procedures)
+DEM_folder = "./data/DEM"
 
 # These names are used later to store the files
 waterbodies_name = "WaterBodiesCrop"
 DEM_name = "DEMCrop"
 
-
 #These folders are created by the script:
-masked_predictions_folder = 'FloodPredictions_masked'
-images_folder = 'SentinelTimeSeries'
-stacked_images_folder = 'SentinelTimeSeriesStacked'
-stacked_images_folder_incl_ghs='SentinelTimeSeriesStacked_Incl_DEM_GHS'
+masked_predictions_folder = './data/FloodPredictions_masked'
+images_folder = './data/SentinelTimeSeries'
+stacked_images_folder = './data/SentinelTimeSeriesStacked'
+stacked_images_folder_incl_ghs='./data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
 
 # Open water and DEM names
 ## Water data can be downloaded as tiff files from: Global Surface Water - Data Access

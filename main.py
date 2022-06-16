@@ -35,13 +35,13 @@ from predict import predict, getAccuracy_ConfMatrix
 from postprocessing import createFrequencyMap
 from ClipAndMask import clipRaster, maskWater
 
+#### Create folders and load file names
 #These folders should exist in your wd 
 input_folder = 'CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 DEM_folder = "./data/DEM"
 human_settlement_folder = "GlobalHumanSettlement"
 training_folder = "TrainingData" #Containing training data (check load_training_data for procedures)
 waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
-
 
 #These folders are created by the script:
 masked_predictions_folder = 'FloodPredictions_masked'
@@ -51,11 +51,16 @@ waterbodies_name = "WaterBodiesCrop"
 DEM_name = "DEMCrop"
 
 # Open water and DEM names
+## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
+## (European Commission’s Joint Research Centre, 2022). https://global-surface-water.appspot.com/download 
+## DEM data can be downloaded as tiff files from: EO Browser (2022). 
+## EO Browser, Home, Explore, derived from, https://www.sentinel-hub.com/explore/eobrowser/
+## More extensive explanation of downloading and storing data is in the file "TrainingDataProcedures.docx"
+## BE AWARE that some tiff files are stored as '.tif' and some as '.tiff'
 water = "./data/WaterBodies/occurrence_10E_20Nv1_3_2020.tif" #Filename of raster file that includes the extents of the Sentinel-1 images
 DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_MAPZEN_Topographic.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 
-# you can download tiff files with water bodies/DEM from ... 
-
+### Indicate preferences
 #Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = True, True
 

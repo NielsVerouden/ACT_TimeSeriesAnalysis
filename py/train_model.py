@@ -17,7 +17,7 @@ def GaussianNaiveBayes(X,y):
 
 
 #### Random Forest
-def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None):
+def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
     print("Fitting Random Forest to input data ... ")
     rf = RandomForestClassifier(n_estimators=n_estimators,
                                 criterion=criterion,        #"gini", "entropy", "log_loss"
@@ -39,7 +39,7 @@ def knn(X,y,n_neighbours=6):
 
 
 ### Support vector machine
-def svm(X,y,C=3, kernel="rbf", degree=6):
+def svm(X,y,C=3, kernel="poly", degree=4):
     print("Fitting Support Vector Machine to input data ... Takes a few minutes")
     svm = SVC(C=C, kernel=kernel, degree=degree, cache_size=1024)
     svm.fit(X, y)

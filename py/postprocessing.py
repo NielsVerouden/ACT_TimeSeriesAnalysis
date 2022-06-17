@@ -52,11 +52,15 @@ def createFrequencyMap(filenames):
     
     #Display each frequency map:
     for title, freq_map in maps.items():
-        permanent_water=100
-        masked_array = np.ma.masked_where(freq_map == permanent_water, freq_map)
         
+        permanent_water=100 
+
+        masked_array = np.ma.masked_where(freq_map == permanent_water, freq_map)
+
         #Define a colormap for the plotted image
-        cmap = matplotlib.cm.plasma  
+        cmap = matplotlib.cm.get_cmap('hsv').copy()
+        cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","yellow","gold", "orange","darkorange", "red", "darkred"])
+        
         #Define a colormap for permanent water (aqua = light blue)
         cmap.set_bad(color='aqua')
         
@@ -65,8 +69,8 @@ def createFrequencyMap(filenames):
         plt.colorbar(c)
         plt.suptitle(title)
         plt.show()
-        
+
     return(maps)
 
-#credit: https://stackoverflow.com/questions/37719304/python-imshow-set-certain-value-to-defined-color
 
+#credit: https://stackoverflow.com/questions/37719304/python-imshow-set-certain-value-to-defined-color

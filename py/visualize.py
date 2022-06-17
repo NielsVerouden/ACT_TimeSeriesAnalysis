@@ -6,6 +6,7 @@ import numpy as np
 from rasterio.plot import reshape_as_image
 import glob
 import os
+from sklearn import tree
 
 def show_histograms(folder):
     filenames = os.listdir(folder)
@@ -59,14 +60,8 @@ def show_backscatter(folder):
             plt.imshow(stck)
             plt.suptitle(title)
             plt.show()
-"""           
-for id in range(0,len(stacked_rasters_names)):
-    title = str(stacked_rasters_names[id][-21:-11]) #select date as title
-    with rio.open(stacked_rasters_names[id],'r') as src:
-        show(src,title=title, transform=src.transform)
-"""
 
-######Visualize:
+######Visualize predictions:
 def visualizePrediction(masked_predictions_names, input_folder):
     for filename in masked_predictions_names:
         date=filename[48:58]
@@ -125,11 +120,20 @@ def visualizePrediction(masked_predictions_names, input_folder):
     plt.close(fig)
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
     
+###Visualize a tree from a Random Forest 
+def visualizeTreeFromRF(rf,data):
+    #fn=data.feature_names
+    #cn=data.target_names
+    plt.figure()
+    fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=800)
+    tree.plot_tree(rf.estimators_[0],
+                   feature_names = ["VV","VH","Ratio","DEM","GHS"], 
+                   class_names=["Dry","Flooded","FloodedUrban"],
+                   filled = True,
+                  proportion=False,
+                  max_depth=5);
+    plt.show()
+    #fig.savefig('rf_individualtree.png')
 
-"""
-date = list(prediction.keys())[0]
-pattern = 'radar_time_series_stacked/*%s*.tiff' % date
-print(pattern)
-for file in glob.glob(pattern):
-    print(file)
-    """
+
+#visualizeTreeFromRF(model,X_train)

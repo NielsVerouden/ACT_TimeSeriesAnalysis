@@ -22,7 +22,7 @@
 ## a VV and VH Sentinel-1 image downloaded from sentinel hub.
 ## The images_folder is automatically created by the script if it is not yet 
 ## present in the current working directory.
-
+import os
 from py.load_data_from_zip_folders import load_data
 from py.visualize import show_backscatter, show_histograms, visualizePrediction
 from py.speckle_filter import apply_lee_filter
@@ -36,15 +36,18 @@ from py.loadDEM_GHS import addDEM_GHS
 #### Create folders and load file names
 #These folders should exist in your wd 
 input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
-waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
-ghs_folder = "./data/GHS" #Containing a zipfile which has a tile of the GHS dataset
-water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
-DEM = './data/DEM/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
 training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
-DEM_folder = "./data/DEM"
-# These names are used later to store the files
-waterbodies_name = "WaterBodiesCrop"
+ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
+DEM_filename = '2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
+DEM_folder = "./data/DEM_Haiti"
+DEM = os.path.join(DEM_folder,DEM_filename)
 DEM_name = "DEMCrop"
+
+# These names are used later to store the files
+waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+waterbodies_name = "WaterBodiesCrop"
+water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
+
 
 #These folders are created by the script:
 masked_predictions_folder = './data/FloodPredictions_masked'
@@ -67,7 +70,7 @@ stacked_images_folder_incl_ghs='./data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
 
 ### Indicate preferences
 #Indicate whether all images and histograms need to be plotted:
-show_sentinel_histograms, show_sentinel_images = True, True
+show_sentinel_histograms, show_sentinel_images = False, True
 
 #Change your preferred model according to your preferences:
 # Some models have additional parameters that can be adjusted to your liking
@@ -146,6 +149,6 @@ visualizePrediction(masked_predictions_names, stacked_images_folder)
 ## Create a flood frequency map based on the time series
 ## How often is each pixel flooded?
 ## Create nice visualization
-frequencymaps = createFrequencyMap(masked_predictions_names)
+frequencymaps= createFrequencyMap(masked_predictions_names)
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time

@@ -86,16 +86,13 @@ addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder, DE
 
 
 
-## Load a local subset of a global DEM and water dataset to aid in the classification
-## Create crops of the DEM and water bodies dataset to the extent of each sentinel image
+## Load a local subset of the water dataset to mask permanent water from the predictions
 ## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
-water_sentinel_combis = clipRaster(stacked_images_folder, water, waterbodies_folder, waterbodies_name)
-DEMCrop = clipRaster(stacked_images_folder, DEM, DEM_folder, DEM_name)
-
+water_sentinel_combis = clipRaster(stacked_images_folder_incl_ghs, water, waterbodies_folder, waterbodies_name)
 
 ## STEP 2: Process data 
 ## If needed: speckle filter ... 
-#list_of_images = apply_lee_filter(list_of_images, input_folder=images_folder, size = 5)
+#list_of_images = apply_lee_filter(stacked_images_folder_incl_ghs, stacked_images_folder_incl_ghs, size = 5)
 
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:

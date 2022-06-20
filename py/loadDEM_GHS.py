@@ -10,7 +10,7 @@ import numpy as np
 def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
     if not os.path.exists(output_folder): os.makedirs(output_folder)
     #sentinel_folder should already contain stacks of vv, vh and vv/vh ratio
-    #the function will add GHS population data to the stack
+    #the function will add GHS population data and a DEM to the stack
     
     #Unzip global human settlement data
     extension=".zip"
@@ -23,7 +23,7 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
                listOfFileNames = zipObj.namelist()
                # Iterate over the file names
                for fileName in listOfFileNames:
-                   # Check filename endswith csv
+                   # Check filename endswith tif
                    if fileName.endswith('.tif'):
                        # Extract a single file from zip
                        zipObj.extract(fileName,GHSfolder)
@@ -36,7 +36,7 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
     ghs_combis = clipRaster(sentinel_folder, ghs_path, GHSfolder, "GHS_Clipped") 
     dem_combis = clipRaster(sentinel_folder, dem_path, DEMfolder, "DEM_Clipped") 
 
-    #Resample to same resolution and stack as fourth band
+    #Resample to same resolution and stack as the Sentinel rasters
     for date, ghs in ghs_combis.items(): 
         dem = dem_combis[date]
         

@@ -1,16 +1,29 @@
 #############
 ## LOAD IMAGES FROM ZIP FILE
 ############
-
-
+from scipy.ndimage.filters import uniform_filter
+from scipy.ndimage.measurements import variance
 import os
 from zipfile import ZipFile
 import glob
 import rasterio as rio
 import numpy as np
+from numpy import linalg
+from sklearn.preprocessing import normalize
 
+def lee_filter(img, size):
+    #Applies a speckle filter with a specified size to an input array
+    img_mean = uniform_filter(img, (size, size))
+    img_sqr_mean = uniform_filter(img**2, (size, size))
+    img_variance = img_sqr_mean - img_mean**2
 
-def load_data(input_name, dest_name, stack_dest_name):
+    overall_variance = variance(img)
+
+    img_weights = img_variance / (img_variance + overall_variance)
+    img_output = img_mean + img_weights * (img - img_mean)
+    return img_output
+
+def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,size=5):
 #input_name =  folder containing multiple zip folders
 # dest_name =  destination folder of files from zip folders
 # stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
@@ -62,12 +75,32 @@ def load_data(input_name, dest_name, stack_dest_name):
         with rio.open(image_path_vh,"r") as vh:
             vh_data=vh.read(1)
         
+        #Optional: Lee speckle filter
+        if lee:
+            vv_data = lee_filter(vv_data, size)
+            vh_data = lee_filter(vh_data, size)
+            
+        if normalize:
+            """
+            Not recommended 
+            vv_min = vv_data.min(axis=(0, 1), keepdims=True)
+            vv_max = vv_data.max(axis=(0, 1), keepdims=True)
+            vv_data = (vv_data - vv_min)/(vv_max - vv_min)
+            
+            vh_min = vh_data.min(axis=(0, 1), keepdims=True)
+            vh_max = vv_data.max(axis=(0, 1), keepdims=True)
+            vh_data = (vh_data - vh_min)/(vh_max - vh_min)
+            
+            vv_data=normalize(vv_data)
+            vh_data=normalize(vh_data)
+            """ 
               #Calculate ratio as third band:
         #np.seterr(divide='ignore', invalid='ignore')
         vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
         check = np.logical_or ( vv_data > 0, vh_data > 0 )
         
-        #VV/VH ratio is calculated as VV-VH, since our data is measured in decibels
+        #VV/VH ratio is calculated as VV/VH, since our data is measured in digital numbers
+        #If the data is measured in decibels, it would have to be VV-VH
         vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
         vvvh_ratio = vvvh_ratio.astype(rio.float32)
         
@@ -83,30 +116,4 @@ def load_data(input_name, dest_name, stack_dest_name):
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
     return
 
-    """
-    #Not needed with the GHS data we use now ~ 
-    with rio.open(cities_path, "r") as ghs:
-        cities_meta=ghs.meta.copy()
-        dstCrs = {'init': 'EPSG:4326'} #WGS84
-        
-        transform, width, height = calculate_default_transform(
-            ghs.crs, dstCrs, ghs.width, ghs.height, *ghs.bounds)
-        cities_meta.update({
-            'crs': dstCrs,
-            'transform': transform,
-            'width': width,
-            'height': height})
-        cities_reproj_name= "Reprojected_GHS_%s" %human_settlement_file
-        cities_reproj_path = os.path.join(human_settlement_folder,cities_reproj_name)
-        #Open destination file for reprojected raster
-        with rio.open(cities_reproj_path, 'w', **cities_meta) as ghs_reproj:
-            reproject(
-                source=rio.band(ghs, 1),
-                destination=rio.band(ghs_reproj, 1),
-                #src_transform=srcRst.transform,
-                src_crs=ghs.crs,
-                #dst_transform=transform,
-                dst_crs=dstCrs,
-                resampling=Resampling.nearest)
-    """
-    
+#credit for function lee_filter: https://stackoverflow.com/questions/39785970/speckle-lee-filter-in-python

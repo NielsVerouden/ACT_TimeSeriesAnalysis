@@ -10,6 +10,8 @@ import os
 from scipy.ndimage.filters import generic_filter
 import numpy as np
 from scipy.stats import mode
+import pandas as pd
+
 """
 from rasterio.plot import show
 from rasterio.plot import show_hist
@@ -86,8 +88,23 @@ def getAccuracy_ConfMatrix(model,x,y_true):
     y_pred = model.predict(x)
     acc = accuracy_score(y_true, y_pred)
     cm = confusion_matrix(y_true, y_pred)
-    cm_display = ConfusionMatrixDisplay(cm).plot()
-    return(acc,cm)
+    ConfusionMatrixDisplay(cm).plot()
+    
+    #Create arrays containing the user and producer accuracies
+    #Divide the N of classified cases by the amount of predicted cases (-> user acc)
+    users_accs = cm.diagonal()/np.sum(cm,axis=0,keepdims=False)
+    
+    #Divide the N of classified cases by the amount of actual cases (-> producer acc)
+    #Axis=1 -> horizontal sum (in the confusion matrix)
+    producers_accs = cm.diagonal()/np.sum(cm,axis=1,keepdims=False)
+    
+    df = pd.DataFrame(np.array([users_accs,producers_accs]),
+                      columns=["Dry Area",
+                               "Flooded Land",
+                               "Flooded Urban"])
+    df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
+    print("="*60,"\n",df,"\n", "="*60)
+    return(acc,df)
 
 
 

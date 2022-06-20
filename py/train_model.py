@@ -10,9 +10,13 @@ import numpy as np
 #### GaussianNaiveBayes Classifier
 def GaussianNaiveBayes(X,y):
     print("Fitting GaussianNaiveBayes Classifier to input data ... ")
+    class_weights = {"Dry":1,
+                     "Flooded":20,
+                     "FloodedUrban":20}
+    #GNB can't deal with class weights?
     gnb = GaussianNB()
     gnb.fit(X, y)
-    print(X.shape)
+
     return gnb
 #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
 #https://towardsdatascience.com/land-cover-classification-in-satellite-imagery-using-python-ae39dbf2929
@@ -22,8 +26,8 @@ def GaussianNaiveBayes(X,y):
 def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
     print("Fitting Random Forest to input data ... ")
     class_weights = {"Dry":1,
-                     "Flooded":50,
-                     "FloodedUrban":10}
+                     "Flooded":20,
+                     "FloodedUrban":20}
     rf = RandomForestClassifier(n_estimators=n_estimators,
                                 criterion=criterion,        #"gini", "entropy", "log_loss"
                                 max_depth=max_depth,        #None or an integer value

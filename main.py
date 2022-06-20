@@ -35,7 +35,7 @@ from py.loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-input_folder = './data/CapHaitienDownloadsFebruary2021' #Containing zip files with vv and vh Sentinel-1 data
+input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
 DEM_filename = '2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
@@ -80,7 +80,7 @@ preferred_model = options[1] #Counting starts at zero !
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
 ## Stack vv and vh bands, together with the vv/vh ratio which is calculated by the function
-load_data(input_folder, images_folder,stacked_images_folder)
+load_data(input_folder, images_folder,stacked_images_folder,lee=True)
 #This function stores all stacked rasters in the folder stacked_images_folder
 addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder, DEM_folder)
 
@@ -89,10 +89,6 @@ addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder, DE
 ## Load a local subset of the water dataset to mask permanent water from the predictions
 ## NB it doesn't matter if the images referred to from stacked_rasters_names have different extents
 water_sentinel_combis = clipRaster(stacked_images_folder_incl_ghs, water, waterbodies_folder, waterbodies_name)
-
-## STEP 2: Process data 
-## If needed: speckle filter ... 
-#list_of_images = apply_lee_filter(stacked_images_folder_incl_ghs, stacked_images_folder_incl_ghs, size = 5)
 
 #Show some simple histograms and plot the images, if specified in line 40:
 if show_sentinel_histograms:
@@ -112,7 +108,7 @@ if preferred_model == "GaussianNaiveBayes":
     model = GaussianNaiveBayes(X_train,y_train)    
 
 elif preferred_model == "RandomForest":
-    model = RandomForest(X_train, y_train,max_depth=10) #See train_model.py for additional parameters
+    model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
     
 elif preferred_model == "K-NearestNeighbours":
     model= knn(X_train, y_train)
@@ -123,7 +119,7 @@ elif preferred_model == "SupportVectorMachine":
 else:
     raise Exception("Preferred model does not exist, please pick one of %s"%options)
     
-test_acc, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
+test_acc, accuracies = getAccuracy_ConfMatrix(model,X_test, y_test)
 
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area

@@ -68,7 +68,7 @@ def load_data(input_name, dest_name, stack_dest_name):
         check = np.logical_or ( vv_data > 0, vh_data > 0 )
         
         #VV/VH ratio is calculated as VV-VH, since our data is measured in decibels
-        vvvh_ratio = np.where ( check,  (vv_data-vh_data), -999 )
+        vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
         vvvh_ratio = vvvh_ratio.astype(rio.float32)
         
         #Update meta to fit three layers

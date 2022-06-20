@@ -4,6 +4,8 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
+from sklearn.utils import class_weight
+import numpy as np
 
 #### GaussianNaiveBayes Classifier
 def GaussianNaiveBayes(X,y):
@@ -19,9 +21,19 @@ def GaussianNaiveBayes(X,y):
 #### Random Forest
 def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
     print("Fitting Random Forest to input data ... ")
+    class_weights = {"Dry":1,
+                     "Flooded":50,
+                     "FloodedUrban":10}
     rf = RandomForestClassifier(n_estimators=n_estimators,
                                 criterion=criterion,        #"gini", "entropy", "log_loss"
-                                max_depth=max_depth)        #None or an integer value
+                                max_depth=max_depth,        #None or an integer value
+                                class_weight="balanced")     #Add class weights (dict or 'balanced')
+    """
+    #Class weights to balance for the different amounts of pixels in each class
+    class_weights = class_weight.compute_class_weight('balanced',
+                                                 classes=np.unique(y),
+                                                 y=y)
+    """
     rf.fit(X,y)
     return rf                            
 #see the following link for all random forest options:

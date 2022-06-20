@@ -21,6 +21,7 @@ import rasterio as rio
 from rasterio.mask import mask
 from sklearn.model_selection import train_test_split
 
+
 def loadTrainingData(training_folder):
     #Retrieve all folders in the training_folder
     trainingDates = os.listdir(training_folder)
@@ -36,7 +37,7 @@ def loadTrainingData(training_folder):
                 polys = gpd.read_file(os.path.join(training_folder,date_folder,file))
                                 #If you get an CRSError: uninstall geopandas and pyproj and reinstall them in your env
                                 #should solve this
-            #Retrieve the pilepath to get the raster file (used later to open the file)                   
+            #Retrieve the filepath to get the raster file (used later to open the file)                   
             if file.endswith(".tiff") and file.startswith("TrainingSentinel"):
                 sentinel_location = os.path.join(training_folder,date_folder,file)
         #generate a list of shapely geometries
@@ -50,10 +51,7 @@ def loadTrainingData(training_folder):
         
                 # the mask function returns an array of the raster pixels within this feature
                 out_image, out_transform = mask(src, feature, crop=True) 
-                # eliminate all the pixels with 0 values for all 3 bands - AKA not actually part of the shapefile
-                #out_image_trimmed = out_image[:,~np.all(out_image == 0, axis=0)]
-                # eliminate all the pixels with 255 values for all 3 bands - AKA not actually part of the shapefile
-                #out_image_trimmed = out_image_trimmed[:,~np.all(out_image_trimmed == 255, axis=0)]
+
                 # reshape the array to [pixel count, bands]
                 out_image_reshaped = out_image.reshape(-1, band_count)
                 

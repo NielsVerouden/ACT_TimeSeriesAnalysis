@@ -34,7 +34,7 @@ from py.loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
+input_folder = './data/CapHaitienDownloadsFebruary2021' #Containing zip files with vv and vh Sentinel-1 data
 training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
 DEM_filename = '2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images

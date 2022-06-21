@@ -75,7 +75,7 @@ sum_diff_3_4 = diff_3_4_vv + diff_3_4_vh
 def diff_city (raster):
     for i in range(0, len(raster)):
         for j in range(0, len(raster[0])):
-            if raster[i][j] > 30000:
+            if raster[i][j] > 20000:
                 raster[i][j] = 1
             else:
                 raster[i][j] = 0
@@ -96,6 +96,7 @@ plt.imshow(city_3_4_vv)
 plt.title('Difference vv ' + list_dates[2] + '_' + list_dates[3])
 plt.show()
 
+plt.imshow(diff_1_2_vv)
 
 
 
@@ -142,12 +143,13 @@ plt.imshow(sum_diff_3_4)
 
 
 
+# Create if function for the i to prevent that it is more than the length
 
-def diff_map (raster_1, raster_2, folder_location, output_location, metadata_file, list_dates):
+
+def diff_map (folder_location, metadata_file):
     # Create output folder
     if not os.path.exists(output_location):
         os.mkdir(output_location)
-    
     
     # Create a list of the files
     list_files = os.listdir(folder_location)
@@ -157,44 +159,111 @@ def diff_map (raster_1, raster_2, folder_location, output_location, metadata_fil
         list_dates = list_files
         list_dates[i] = list_files[i][0:10]
     
-        # Substract raster_1 from raster_2
-        diff_raster = raster_2 - raster_1
+    # Create a list of the files, because the former is overwritten
+    list_files = os.listdir(folder_location)
     
-    # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
-    for i in range(0, len(diff_raster)):
-        for j in range(0, len(diff_raster[0])):
-            if diff_raster[i][j] > 30000:
-                diff_raster[i][j] = 1
-            else:
-                diff_raster[i][j] = 0
-                
-    # Plot the difference raster
-    plt.imshow(diff_raster)
-    plt.title('Difference_' + list_dates[0] + '_' + list_dates[1])
-    plt.show()
-     
-    # Create outputname
-    dates = list_dates[0] +'_' + list_dates[1]
-    output_name = '%s_diff_raster.tiff' % dates
-    diff_raster_filepath=os.path.join(output_location,output_name)
-    
-    # Open the metadata
-    with rio.open(metadata_file,"r") as vv:
-        meta=vv.meta
-        vv_data=vv.read(1)
-              
-    #Update meta to fit three layers
-    meta.update(count=3)
-    meta.update(dtype=rio.float32)
+    # Substract rasters from each other
+    for i in range(0, len(list_files)-1):
         
-    with rio.open(diff_raster_filepath, "w",**meta) as dst:
-       dst.write_band(1,vv_data.astype(rio.float32))
+        raster_name_1 = os.path.join(folder_location, list_files[i]) 
+        raster_name_2 = os.path.join(folder_location, list_files[i+1]) 
+        
+        raster_1 = rio.open(raster_name_1)
+        raster_2 = rio.open(raster_name_2)
+        
+        diff_raster = raster_2.read()[0] - raster_1.read()[0]
+        
+        # Create only 0 and 1 values
+        diff_raster[diff_raster>30000] = 1
+        diff_raster[diff_raster<=30000] = 0
+
+                
+     
+        # Create outputname
+        dates = list_dates[i] +'_' + list_dates[i+1]
+        output_name = '%s_diff_raster.tiff' % dates
+        diff_raster_filepath=os.path.join(output_location,output_name)
+    
+        # Open the metadata
+        #with rio.open(metadata_file,"r") as vv:
+        meta=raster_1.meta
+        #vv_data=vv.read(1)
+              
+        #Update meta to fit three layers
+        meta.update(count=1)
+        meta.update(dtype=rio.float32)
+        
+        with rio.open(diff_raster_filepath, "w",**meta) as dst:
+            dst.write_band(1,diff_raster.astype(rio.float32))
 
     
     return(print('\n' + output_name + ' has been saved in ' + output_location))
-    
 
-diff_map(vv_1, vv_2, folder_location, output_location, metadata_file, list_dates)
+
+
+diff_map(folder_location, metadata_file)
+
+
+
+raster_1 = rio.open('./data/DifferenceMaps/2021-04-02_2021-04-05_diff_raster.tiff')
+raster_2 = rio.open('./data/DifferenceMaps/2021-04-05_2021-04-07_diff_raster.tiff')
+raster_3 = rio.open('./data/DifferenceMaps/2021-04-07_2021-04-12_diff_raster.tiff')
+raster_4 = rio.open('./data/DifferenceMaps/2021-04-12_2021-04-14_diff_raster.tiff')
+raster_5 = rio.open('./data/DifferenceMaps/2021-04-14_2021-04-17_diff_raster.tiff')
+
+plt.imshow(raster_1)
+plt.imshow(raster_2)
+plt.imshow(raster_3)
+plt.imshow(raster_4)
+plt.imshow(raster_5)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
+        for j in range(0, len(diff_raster)):
+            for k in range(0, len(diff_raster[0])):
+                if diff_raster[j][k] > 30000:
+                    diff_raster[j][k] = 1
+                else:
+                    diff_raster[j][k] = 0
+
+
+
+
+    for filename in filenames:
+        with rio.open(filename) as src:
+            
+            flood_predictions= src.read()
+
+            if 'frequencymapComb' not in locals(): 
+                frequencymapComb = np.zeros_like(flood_predictions)
+            if 'frequencymapUrban' not in locals(): 
+                frequencymapUrban = np.zeros_like(flood_predictions)
+            if 'frequencymapLand' not in locals(): 
+                frequencymapLand = np.zeros_like(flood_predictions)
+                
+            #Create binary rasters where 0 is non-flooded, 1 is flooded
+            #1=flooded urban areas:
+            frequencymapUrban[flood_predictions==2] += 1
+            frequencymapUrban[flood_predictions==100] = 100
     
 
 

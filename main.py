@@ -24,8 +24,7 @@
 ## present in the current working directory.
 import os
 from py.load_data_from_zip_folders import load_data
-from py.visualize import show_backscatter, show_histograms, visualizePrediction
-from py.speckle_filter import apply_lee_filter
+from py.visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
 from py.load_training_data import loadTrainingData
 from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
 from py.predict import predict, getAccuracy_ConfMatrix
@@ -101,9 +100,10 @@ if show_sentinel_images:
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
 X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
-
+visualizeData(X_train, y_train)
 #Train a Gaussian Naive Bayes model
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
+
 if preferred_model == "GaussianNaiveBayes":
     model = GaussianNaiveBayes(X_train,y_train)    
 
@@ -119,7 +119,7 @@ elif preferred_model == "SupportVectorMachine":
 else:
     raise Exception("Preferred model does not exist, please pick one of %s"%options)
     
-test_acc, accuracies = getAccuracy_ConfMatrix(model,X_test, y_test)
+test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
@@ -135,7 +135,7 @@ masked_predictions_names = maskWater(water_sentinel_combis,masked_predictions_fo
 #show prediction results of one image (uncomment):
 #visualizePrediction(prediction)
 #show all prediction results:
-visualizePrediction(masked_predictions_names, stacked_images_folder)
+visualizePrediction(masked_predictions_names, stacked_images_folder_incl_ghs)
 
 
 ## STEP 4: Post processing

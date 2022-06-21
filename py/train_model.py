@@ -26,8 +26,8 @@ def GaussianNaiveBayes(X,y):
 def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
     print("Fitting Random Forest to input data ... ")
     class_weights = {"Dry":1,
-                     "Flooded":20,
-                     "FloodedUrban":20}
+                     "Flooded":200,
+                     "FloodedUrban":200}
     rf = RandomForestClassifier(n_estimators=n_estimators,
                                 criterion=criterion,        #"gini", "entropy", "log_loss"
                                 max_depth=max_depth,        #None or an integer value

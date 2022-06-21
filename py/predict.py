@@ -11,6 +11,7 @@ from scipy.ndimage.filters import generic_filter
 import numpy as np
 from scipy.stats import mode
 import pandas as pd
+from matplotlib import pyplot as plt
 
 """
 from rasterio.plot import show
@@ -18,7 +19,7 @@ from rasterio.plot import show_hist
 from rasterio.windows import Window
 from matplotlib import pyplot as plt
 """
-def predict(folder, model, training_polys, dest_name="FloodPredictions", 
+def predict(folder, model, training_polys, dest_name="./data/FloodPredictions", 
             majorityfilter=False, size=3):
     
     if not os.path.exists(dest_name): os.makedirs(dest_name)
@@ -88,8 +89,9 @@ def getAccuracy_ConfMatrix(model,x,y_true):
     y_pred = model.predict(x)
     acc = accuracy_score(y_true, y_pred)
     cm = confusion_matrix(y_true, y_pred)
+    plt.figure()
     ConfusionMatrixDisplay(cm).plot()
-    
+    plt.show()
     #Create arrays containing the user and producer accuracies
     #Divide the N of classified cases by the amount of predicted cases (-> user acc)
     users_accs = cm.diagonal()/np.sum(cm,axis=0,keepdims=False)
@@ -104,7 +106,7 @@ def getAccuracy_ConfMatrix(model,x,y_true):
                                "Flooded Urban"])
     df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
     print("="*60,"\n",df,"\n", "="*60)
-    return(acc,df)
+    return(acc,df,cm)
 
 
 

@@ -6,6 +6,12 @@ import geopandas as gpd
 from rasterio.mask import mask
 from shapely.geometry import box
 
+# Set the folder location
+folder_location = './data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
+output_location = './data/DifferenceMaps'
+
+# Use a file to get the 
+metadata_file = './data/SentinelTimeSeriesStacked_Incl_DEM_GHS/2021-04-02_Stack_vv_vh_vvvh_ghs_dem.tiff'
 
 # List the files in the directory
 list_files = os.listdir('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS')
@@ -28,65 +34,87 @@ stack_2 = rio.open('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS/2021-04-05_Sta
 stack_3 = rio.open('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS/2021-04-07_Stack_vv_vh_vvvh_ghs_dem.tiff')
 stack_4 = rio.open('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS/2021-04-12_Stack_vv_vh_vvvh_ghs_dem.tiff')
 
-
+# Open the first layers: vv
 vv_1 = stack_1.read()[0]
 vv_2 = stack_2.read()[0]
 vv_3 = stack_3.read()[0]
 vv_4 = stack_4.read()[0]
 
-diff_1_2 = vv_2 - vv_1
-diff_2_3 = vv_3 - vv_2
-diff_3_4 = vv_4 - vv_3
+# Open the second layers: vh
+vh_1 = stack_1.read()[1]
+vh_2 = stack_2.read()[1]
+vh_3 = stack_3.read()[1]
+vh_4 = stack_4.read()[1]
 
-diff_raster_1_2 = diff_1_2
-diff_raster_2_3 = diff_2_3
-diff_raster_3_4 = diff_3_4
+# Open the third layers: vv/vh
+vv_vh_1 = stack_1.read()[2]
+vv_vh_2 = stack_2.read()[2]
+vv_vh_3 = stack_3.read()[2]
+vv_vh_4 = stack_4.read()[2]
 
-plt.imshow(diff_raster_1_2)
-plt.imshow(diff_raster_2_3)
-plt.imshow(diff_raster_3_4)
+# Calculate the difference between two bands
+diff_1_2_vv = vv_2 - vv_1
+diff_2_3_vv = vv_3 - vv_2
+diff_3_4_vv = vv_4 - vv_3
 
+diff_1_2_vh = vh_2 - vh_1
+diff_2_3_vh = vh_3 - vh_2
+diff_3_4_vh = vh_4 - vh_3
+
+diff_ratio_1_2 = vv_vh_1 - vv_vh_2
+diff_ratio_2_3 = vv_vh_2 - vv_vh_3
+diff_ratio_3_4 = vv_vh_3 - vv_vh_4
+
+# Sum the differences from both layers: vv + vh
+sum_diff_1_2 = diff_1_2_vv + diff_1_2_vh
+sum_diff_2_3 = diff_2_3_vv + diff_2_3_vh
+sum_diff_3_4 = diff_3_4_vv + diff_3_4_vh
+
+
+# Get only 1 and 0 values to distuingish flooded and non-flooded cities better
 def diff_city (raster):
     for i in range(0, len(raster)):
         for j in range(0, len(raster[0])):
-            if raster[i][j] > 1000:
+            if raster[i][j] > 30000:
                 raster[i][j] = 1
             else:
                 raster[i][j] = 0
     return(raster)
 
-city_1_2 = diff_city(diff_raster_1_2)
-plt.imshow(city_1_2)
+city_1_2_vv = diff_city(diff_1_2_vv)
+plt.imshow(city_1_2_vv)
+plt.title('Difference vv ' + list_dates[0] + '_' + list_dates[1])
+plt.show()
 
-city_2_3 = diff_city(diff_raster_2_3)
-plt.imshow(city_2_3)
+city_2_3_vv = diff_city(diff_2_3_vv)
+plt.imshow(city_2_3_vv)
+plt.title('Difference vv ' + list_dates[1] + '_' + list_dates[2])
+plt.show()
 
-city_3_4 = diff_city(diff_raster_3_4)
-plt.imshow(city_3_4)
-
-
-
-city_polys = gpd.read_file("./data/city_polygons/city_polygons.shp")
-
-bounds = city_polys.bounds    
-geom = box(*bounds)
-
-
-minx, miny = -72.190091, 19.731434
-maxx, maxy = -72.186256, 19.735062
-
-bounds = box(minx, miny, maxx, maxy)
-
-
-
-
-test, out_transform = mask(city_1_2, bounds, crop=True)
+city_3_4_vv = diff_city(diff_3_4_vv)
+plt.imshow(city_3_4_vv)
+plt.title('Difference vv ' + list_dates[2] + '_' + list_dates[3])
+plt.show()
 
 
 
 
 
 
+city_1_2_vh = diff_city(diff_1_2_vh)
+plt.imshow(city_1_2_vh)
+plt.title('Difference vh ' + list_dates[0] + '_' + list_dates[1])
+plt.show()
+
+city_2_3_vh = diff_city(diff_2_3_vh)
+plt.imshow(city_2_3_vh)
+plt.title('Difference vh ' + list_dates[1] + '_' + list_dates[2])
+plt.show()
+
+city_3_4_vh = diff_city(diff_3_4_vh)
+plt.imshow(city_3_4_vh)
+plt.title('Difference vh ' + list_dates[2] + '_' + list_dates[3])
+plt.show()
 
 
 
@@ -94,47 +122,82 @@ test, out_transform = mask(city_1_2, bounds, crop=True)
 
 
 
-def remove_small_diff (diff_raster): 
-    for i in range(0,len(diff_raster)):
-        for j in range(0, len(diff_raster)):
-            if diff_raster[i][j] < 2000 and diff_raster[i][j] > -2000:
-                diff_raster[i][j] = 0
+
+# Plot the results
+plt.imshow(diff_1_2_vv)
+plt.imshow(diff_2_3_vv)
+plt.imshow(diff_3_4_vv)
+
+plt.imshow(diff_1_2_vh)
+plt.imshow(diff_2_3_vh)
+plt.imshow(diff_3_4_vh)
+
+plt.imshow(diff_ratio_1_2)
+plt.imshow(diff_ratio_2_3)
+plt.imshow(diff_ratio_3_4)
+
+plt.imshow(sum_diff_1_2)
+plt.imshow(sum_diff_2_3)
+plt.imshow(sum_diff_3_4)
+
+
+
+
+def diff_map (raster_1, raster_2, folder_location, output_location, metadata_file, list_dates):
+    # Create output folder
+    if not os.path.exists(output_location):
+        os.mkdir(output_location)
+    
+    
+    # Create a list of the files
+    list_files = os.listdir(folder_location)
+    
+    # Get the dates of all the input files
+    for i in range(0,len(list_files)):
+        list_dates = list_files
+        list_dates[i] = list_files[i][0:10]
+    
+        # Substract raster_1 from raster_2
+        diff_raster = raster_2 - raster_1
+    
+    # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
+    for i in range(0, len(diff_raster)):
+        for j in range(0, len(diff_raster[0])):
+            if diff_raster[i][j] > 30000:
+                diff_raster[i][j] = 1
             else:
-                diff_raster[i][j] = diff_raster[i][j]
-    return(diff_raster)
+                diff_raster[i][j] = 0
+                
+    # Plot the difference raster
+    plt.imshow(diff_raster)
+    plt.title('Difference_' + list_dates[0] + '_' + list_dates[1])
+    plt.show()
+     
+    # Create outputname
+    dates = list_dates[0] +'_' + list_dates[1]
+    output_name = '%s_diff_raster.tiff' % dates
+    diff_raster_filepath=os.path.join(output_location,output_name)
+    
+    # Open the metadata
+    with rio.open(metadata_file,"r") as vv:
+        meta=vv.meta
+        vv_data=vv.read(1)
+              
+    #Update meta to fit three layers
+    meta.update(count=3)
+    meta.update(dtype=rio.float32)
+        
+    with rio.open(diff_raster_filepath, "w",**meta) as dst:
+       dst.write_band(1,vv_data.astype(rio.float32))
 
-big_diff = remove_small_diff(diff_1_2)
-plt.imshow(big_diff)
+    
+    return(print('\n' + output_name + ' has been saved in ' + output_location))
+    
+
+diff_map(vv_1, vv_2, folder_location, output_location, metadata_file, list_dates)
+    
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# Open data
-stack_1 = rio.open('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS/%s_Stack_vv_vh_vvvh_ghs_dem.tiff' % list_dates[0]
-
-vvname = '%s*_VV_*.tiff' % date
-
-'%s_Stack_vv_vh_vvvh_ghs_dem.tiff' % list_dates[0]

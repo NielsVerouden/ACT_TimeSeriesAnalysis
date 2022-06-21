@@ -74,7 +74,7 @@ def loadTrainingData(training_folder):
     #y has the labels per pixels
     
     #We randomly split X and y in training and test datasets
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=4)
     #These arrays can later be used to train machine or deep learning models
     # and to get unbiased estimates of test accuracy
     return(X_train, X_test, y_train, y_test, polys)

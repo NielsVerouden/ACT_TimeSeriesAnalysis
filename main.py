@@ -125,7 +125,7 @@ test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 ## Either for one file (e.g. stacked_rasters_names[0]) or for all files in a list
 # Set majorityfilter to True to apply majority filter (more accurate but takes a few minutes)
-predictions_dict, predictions_filenames= predict(stacked_images_folder_incl_ghs, model, training_polys, majorityfilter=False)
+predictions_dict, predictions_filenames= predict(stacked_images_folder_incl_ghs, model, training_polys, majorityfilter=True)
 
 ## predictions is a dictionairy containing a time series of classified maps
 #Now mask the water bodies from each prediction

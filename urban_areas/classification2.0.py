@@ -63,7 +63,7 @@ from os import listdir
 from os.path import isfile, join
 
 mypath = "data/SAR/"
-urban_areas = "data/built_polygon/urban_areas_polygon.shp"
+urban_areas = "data/cap_haitien_polygons/urban_areas_polygon.shp"
 mean_values = []
 
 file_names = [file for file in listdir(mypath) if isfile(join(mypath, file))]

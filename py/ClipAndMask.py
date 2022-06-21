@@ -75,7 +75,7 @@ def maskWater(combinations_dict,dest_folder,mask_value=0):
     for date, water_name in combinations_dict.items():
         #Look for the file in the prediction  folder
         #that corresponds to the key/value pair in the dictionary
-        pattern = 'FloodPredictions\\FloodPrediction_%s*.tiff' % date
+        pattern = '.\data\\FloodPredictions\\FloodPrediction_%s*.tiff' % date
         for file in glob.glob(pattern):
             raster_name= file
         
@@ -113,7 +113,7 @@ def maskWater(combinations_dict,dest_folder,mask_value=0):
             raster[i][water_binary_resized[0]==1]=mask_value
         
         # Save the rasters as tif
-        output_name="MaskedPrediction_%s.tiff"%raster_name[33:44]
+        output_name="MaskedPrediction_%s.tiff"%raster_name[40:50]
         outputpath = os.path.join(dest_folder,output_name)
         with rio.open(outputpath, 'w', **raster_meta) as dst:
             dst.write(raster.astype(rio.float32))

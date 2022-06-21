@@ -1,4 +1,4 @@
-from rasterio.plot import show
+import seaborn as sns
 import rasterio as rio
 from rasterio.plot import show_hist
 import matplotlib.pyplot as plt
@@ -7,7 +7,8 @@ from rasterio.plot import reshape_as_image
 import glob
 import os
 from sklearn import tree
-
+import numpy as np
+import pandas as pd
 def show_histograms(folder):
     filenames = os.listdir(folder)
     filenames_sorted = sorted(filenames)
@@ -135,5 +136,10 @@ def visualizeTreeFromRF(rf,data):
     plt.show()
     #fig.savefig('rf_individualtree.png')
 
-
-#visualizeTreeFromRF(model,X_train)
+def visualizeData(X,y):
+    df = pd.DataFrame(columns=['VV', 'VH',"VV/VH","GHS","DEM"], data=X)
+    df['Label'] = y
+    plt.figure()
+    sns.pairplot(df, height=2.5, hue='Label')
+    plt.show()
+    return

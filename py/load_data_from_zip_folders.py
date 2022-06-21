@@ -96,24 +96,50 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
             """ 
               #Calculate ratio as third band:
         #np.seterr(divide='ignore', invalid='ignore')
-        vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
-        check = np.logical_or ( vv_data > 0, vh_data > 0 )
+        #vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
+       # check = np.logical_or ( vv_data > 0, vh_data > 0 )
         
         #VV/VH ratio is calculated as VV/VH, since our data is measured in digital numbers
         #If the data is measured in decibels, it would have to be VV-VH
-        vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
-        vvvh_ratio = vvvh_ratio.astype(rio.float32)
-        
+        # Division by zero returns a zero due to the where statement
+                    #vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
+        vvvh_ratio = np.divide(vv_data, vh_data, out=np.zeros_like(vv_data), where=vh_data!=0)
+        # Replace outliers of the data by the median
+        vvvh_ratio=np.where(vvvh_ratio>5,np.median(vvvh_ratio),vvvh_ratio)
+        vvvh_ratio_rescaled = np.interp(vvvh_ratio, (vvvh_ratio.min(), vvvh_ratio.max()), (np.amin(vh_data), np.amax(vh_data)))
+
         #Update meta to fit three layers
         meta.update(count=3)
+        meta.update(dtype=rio.float32)
         
         stack_filename="%s_vv_vh_vvvhratio_Stack.tiff"%date
         stack_filepath=os.path.join(stack_dest_name,stack_filename)
         with rio.open(stack_filepath, "w",**meta) as dst:
             dst.write_band(1,vv_data.astype(rio.float32))
             dst.write_band(2,vh_data.astype(rio.float32))
-            dst.write_band(3,vvvh_ratio)
+            dst.write_band(3,vvvh_ratio_rescaled)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
     return
 
 #credit for function lee_filter: https://stackoverflow.com/questions/39785970/speckle-lee-filter-in-python
+"""
+redundant:
+path=os.path.join(stacked_images_folder_incl_ghs,"2021-04-05_Stack_vv_vh_vvvh_ghs_dem.tiff")
+src=rio.open(path,"r")
+vv=src.read(1)
+vh=src.read(2)
+ratio=src.read(3)
+
+u = np.median(ratio)
+s = np.std(ratio)
+f1 = u - 2*s
+f2 = u + 0.5
+
+new_ratio = np.where(ratio>f2, ratio, np.median(ratio))
+
+new_ratio_rescaled = np.interp(new_ratio, (new_ratio.min(), f2), (np.amin(vh), np.amax(vh)))
+print(np.histogram(new_ratio_rescaled))
+
+audio = ratio/(u)
+image *= (255.0/image.max())
+"""

@@ -78,8 +78,8 @@ def diff_map (raster_stack, polarization):
         
         
         # Create outputname
-        dates = list_dates[j] +'_' + list_dates[j+1] + polarization
-        output_name = '%s_diff_raster.tiff' % dates
+        name = list_dates[j] +'_' + list_dates[j+1] +'_' + polarization
+        output_name = '%s_diff_raster.tiff' % name
         diff_raster_filepath=os.path.join(output_location,output_name)
     
         # Open the metadata

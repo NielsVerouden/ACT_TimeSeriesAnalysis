@@ -1,83 +1,72 @@
 '''
-*Version: 2.0 Published: 2021/03/09* Source: [NASA POWER](https://power.larc.nasa.gov/)
-POWER API Multi-Point Download
-This is an overview of the process to request data from multiple data points from the POWER API.
-Edited by Niels Verouden
+//Version: 2.0 Published: 2021/03/09//
+
+POWER API SINGLE-POINT DOWNLOAD
+This is an overview of the process to request data from a single data point 
+from the POWER API. The input parameters should be defined at step 1 (define
+input parameters).
+
+Source: https://power.larc.nasa.gov/
 '''
+# =============================================================================
+# STEP 0: IMPORT PACKAGES
+# =============================================================================
+import os
+import requests
+import csv
+import datetime
 
-##### Import packages #####
-import os, json, requests, csv
+# =============================================================================
+# STEP 1: DEFINE INPUT PARAMETERS
+# =============================================================================
+# Possible time intervals are hourly, daily, or monthly. The data is downloaded
+# to the 'dest_name' folder in the 'data' folder. The standard dest_name is 
+# climate_data, so data is stored in "./data/climate_date/___.csv".
 
+longitude = -72.206768
+latitude =  19.737036
+start = '2020-01-01'
+end = '2020-10-01'
+dest_name = "climate_data"  
+time_interval =  'daily'
 
-##### Define parameters #####
-locations =      [(19.73736, -72.206768 )]       # Can define single or multiple points (lat, lon)
-start =          20220101                    # Start data (yyyyMMdd)
-end =            20220501                    # End date (yyyyMMdd)
-output =         r"./Data/climate_data"      # Define folder where data is saved
-time_interval =  'daily'                     # hourly, daily, or monthly. Default is monthly
-file_format =    'CSV'                       # Format of file, CSV or JSON
+# =============================================================================
+# STEP 2: DEFINE URL AND CONVERT START AND END DATE
+# =============================================================================
+start = datetime.datetime.strptime(start, '%Y-%m-%d')
+start = int(start.strftime("%Y%m%d"))
 
-# Create output folder if it has not been created yet
-output_location = './data/climate_data'
+end = datetime.datetime.strptime(end, '%Y-%m-%d')
+end = int(end.strftime("%Y%m%d"))
 
-if not os.path.exists(output_location):
-    os.mkdir(output_location)
+api_url = f"https://power.larc.nasa.gov/api/temporal/{time_interval}/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format=CSV"
 
-##### Define base_url based on time_interval #####
-if time_interval == 'hourly':
-    base_url = r'https://power.larc.nasa.gov/api/temporal/hourly/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format={file_format}'
+# =============================================================================
+# STEP 1: DOWNLOAD CLIMATE DATA
+# =============================================================================
+def downloadClimateData (api_url, dest_name):
+    # Create directory
+    if not os.path.exists(os.path.join('data',dest_name)):
+        os.makedirs(os.path.join('data',dest_name))
+    # Download from api_url
+    download = requests.Session().get(api_url)
     
-elif time_interval == 'daily':
-    base_url = r"https://power.larc.nasa.gov/api/temporal/daily/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format={file_format}"
-
-else:
-    start = int(str(start)[0:4])
-    end = int(str(end)[0:4])
-    base_url = r"https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format={file_format}"
-
-##### Define message if download is successful or not
-success = '{time_int} data .{fformat} has been downloaded'.format(time_int = time_interval, fformat = file_format)
-fail = "File format .{fformat} not supported, choose either CSV or JSON".format(fformat = file_format)
-
-##### Download climate data based on predefined parameters #####
-for latitude, longitude in locations:
-    api_request_url = base_url.format(longitude=longitude, latitude=latitude, start=start, end=end, file_format=file_format) 
+    decoded_content = download.content.decode('utf-8')
     
-    # Download data as CSV
-    if file_format == "CSV":
-        
-        with requests.Session() as s:
-            download = s.get(api_request_url)
-        
-            decoded_content = download.content.decode('utf-8')
-            
-            filename = download.headers['content-disposition'].split('filename=')[1]
+    # Define file name    
+    file_name = download.headers['content-disposition'].split('filename=')[1]
     
-            cr = csv.reader(decoded_content.splitlines(), delimiter=',')
-           
-            my_list = list(cr)
-            
-            file = open(output+'/'+filename, 'w+', newline ='')
+    # Read CSV file with line splitter
+    cr = csv.reader(decoded_content.splitlines(), delimiter=',')
     
-            with file:   
-                write = csv.writer(file)
-                write.writerows(my_list)
-        
-        print(success)
+    # Create path_name and open file
+    path_name = os.path.join('data', dest_name, file_name)
+    file = open(path_name, 'w+', newline ='')
     
-    # Download data as JSON 
-    elif file_format == "JSON":
-        response = requests.get(url=api_request_url, verify=True, timeout=30.00)
+    # Write CSV file to directory
+    with file:   
+        write = csv.writer(file)
+        write.writerows(list(cr))
 
-        content = json.loads(response.content.decode('utf-8'))
-        filename = response.headers['content-disposition'].split('filename=')[1]
-
-        filepath = os.path.join(output, filename)
-        
-        with open(filepath, 'w') as file_object:
-            json.dump(content, file_object)
-        
-        print(time_interval+' data .'+file_format+' has been downloaded')
-
-    else:
-        print(fail)
+# Execute download climate data function
+downloadClimateData(api_url, dest_name)

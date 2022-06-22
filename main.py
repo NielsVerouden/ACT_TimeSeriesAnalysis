@@ -149,7 +149,9 @@ frequencymaps= createFrequencyMap(masked_predictions_names)
 ## The threshold needs to be entered: everything above this threshold will be 1
 ## the remaining will be 0. This will visualise only the high backscatter
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
-diff_map(stacked_images_folder_incl_ghs, 'vv', 25000)
+diff_map(stacked_images_folder_incl_ghs, 'vv', 20000)
+
+
 
 
 

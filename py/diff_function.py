@@ -3,10 +3,12 @@ import os
 import matplotlib.pyplot as plt
 
 
-def diff_map (raster_stack):
+def diff_map (raster_stack, polarization):
     
-    # Set the folder location
+    # Load raster stacks as input
     input_folder = raster_stack
+    
+    # Set the output folder
     output_location = './data/DifferenceMaps'
     
     # Create output folder if it has not been created yet
@@ -28,6 +30,19 @@ def diff_map (raster_stack):
     # Create a list of the files, because the former is overwritten
     list_files = os.listdir(input_folder)
     
+    # Select the correct polarization
+    if polarization == 'vv':
+        pol = 0
+    elif polarization == 'vh':
+        pol = 1
+    elif polarization == 'ratio':
+        pol = 2
+    else:
+        pol = 0
+        print('Only, "vv", "vh", and "ratio" are correct parameters for the polarization. Now the vv has been chosen, if another polarization is wanted please ruen the function again with the correct parameter.')
+        
+    
+    
     # Substract rasters from each other
     ## This will be done for all consecutive rasters due to the for loop
     for j in range(0, len(list_files)-1):
@@ -38,7 +53,7 @@ def diff_map (raster_stack):
         raster_1 = rio.open(raster_name_1)
         raster_2 = rio.open(raster_name_2)
         
-        diff_raster = raster_2.read()[0] - raster_1.read()[0]
+        diff_raster = raster_2.read()[pol] - raster_1.read()[pol]
         
         ###################### This does not work #############################
         # Create only 0 and 1 values

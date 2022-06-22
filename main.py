@@ -144,8 +144,10 @@ frequencymaps= createFrequencyMap(masked_predictions_names)
 ## STEP 5: Create difference maps
 ## Create different maps of all consecutive sentinel-1 images
 ## The function uses the stacks created in STEP 1
+## The polarization which is wanted to create difference map from has to be entered as well:
+### Options are: 'vv', 'vh', and 'ratio'. If another string is entered, the 'vv' will be runned.
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
-diff_map(stacked_images_folder_incl_ghs)
+diff_map(stacked_images_folder_incl_ghs, 'vv')
 
 
 

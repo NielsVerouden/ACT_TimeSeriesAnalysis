@@ -145,7 +145,9 @@ frequencymaps= createFrequencyMap(masked_predictions_names)
 ## Create different maps of all consecutive sentinel-1 images
 ## The function uses the stacks created in STEP 1
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
-diff_map()
+diff_map(stacked_images_folder_incl_ghs)
+
+
 
 
 

@@ -3,10 +3,10 @@ import os
 import matplotlib.pyplot as plt
 
 
-def diff_map ():
+def diff_map (raster_stack):
     
     # Set the folder location
-    input_folder = './data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
+    input_folder = raster_stack
     output_location = './data/DifferenceMaps'
     
     # Create output folder if it has not been created yet

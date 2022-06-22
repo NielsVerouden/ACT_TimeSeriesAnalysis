@@ -26,7 +26,7 @@ import os
 from py.load_data_from_zip_folders import load_data
 from py.visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
 from py.load_training_data import loadTrainingData
-from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
+from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm, RandomForest_FindParams
 from py.predict import predict, getAccuracy_ConfMatrix
 from py.postprocessing import createFrequencyMap
 from py.ClipAndMask import clipRaster, maskWater
@@ -34,7 +34,7 @@ from py.loadDEM_GHS import addDEM_GHS
 
 #### Create folders and load file names
 #These folders should exist in your wd 
-input_folder = './data/CapHaitienDownloadsFebruary2021' #Containing zip files with vv and vh Sentinel-1 data
+input_folder = './data/CapHaitienDownloadsApril2021' #Containing zip files with vv and vh Sentinel-1 data
 training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
 DEM_filename = '2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
@@ -101,23 +101,16 @@ if show_sentinel_images:
 #Check load_training_data.py to check how the training folder should be structured
 X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
 visualizeData(X_train, y_train)
-#Train a Gaussian Naive Bayes model
+
+#Find the best parameters for random forest using a cross validation approach
+model, results,best_params = RandomForest_FindParams(X_train,y_train)
+#Train a random forest classifier
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
-
-if preferred_model == "GaussianNaiveBayes":
-    model = GaussianNaiveBayes(X_train,y_train)    
-
-elif preferred_model == "RandomForest":
-    model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
+#model = GaussianNaiveBayes(X_train,y_train)    
+model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
+#model= knn(X_train, y_train)
+#model = svm(X_train, y_train)    
     
-elif preferred_model == "K-NearestNeighbours":
-    model= knn(X_train, y_train)
-
-elif preferred_model == "SupportVectorMachine":
-    model = svm(X_train, y_train)    
-    
-else:
-    raise Exception("Preferred model does not exist, please pick one of %s"%options)
     
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
 

@@ -20,7 +20,7 @@ from rasterio.windows import Window
 from matplotlib import pyplot as plt
 """
 def predict(folder, model, training_polys, dest_name="./data/FloodPredictions", 
-            majorityfilter=False, size=3):
+            majorityfilter=False, size=7):
     
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     #if image_path is a list, we have to predict for each file in the list,
@@ -105,7 +105,7 @@ def getAccuracy_ConfMatrix(model,x,y_true):
                                "Flooded Land",
                                "Flooded Urban"])
     df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
-    print("="*60,"\n",df,"\n", "="*60)
+    print("="*60,"\n",df,"\n", "="*60,"\n","Overall test accuracy = %.2f"%acc)
     return(acc,df,cm)
 
 

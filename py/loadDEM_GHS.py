@@ -69,8 +69,8 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
             ratio=dst.read(3)
             
          #Rescale values to common range (eases training a model)   
-        dem_band_rescaled = np.interp(dem_band_resized, (dem_band_resized.min(), dem_band_resized.max()), (np.amin(vv), np.amax(vv)))
-        ghs_band_rescaled= np.interp(ghs_band_resized, (ghs_band_resized.min(), ghs_band_resized.max()), (np.amin(vv), np.amax(vv)))
+        #dem_band_rescaled = np.interp(dem_band_resized, (dem_band_resized.min(), dem_band_resized.max()), (np.amin(vv), np.amax(vv)))
+        #ghs_band_rescaled= np.interp(ghs_band_resized, (ghs_band_resized.min(), ghs_band_resized.max()), (np.amin(vv), np.amax(vv)))
 
         meta.update(count=5, dtype=rio.float32)
         filename="%s_Stack_vv_vh_vvvh_ghs_dem.tiff"%date
@@ -79,8 +79,8 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
             dst.write_band(1,vv.astype(rio.float32))
             dst.write_band(2,vh.astype(rio.float32))
             dst.write_band(3,ratio.astype(rio.float32))
-            dst.write_band(4, ghs_band_rescaled.astype(rio.float32))
-            dst.write_band(5, dem_band_rescaled.astype(rio.float32))
+            dst.write_band(4, ghs_band_resized.astype(rio.float32))
+            dst.write_band(5, dem_band_resized.astype(rio.float32))
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio',"Population","DEM"])
     return   
 

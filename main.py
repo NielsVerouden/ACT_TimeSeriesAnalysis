@@ -139,3 +139,13 @@ visualizePrediction(masked_predictions_names, stacked_images_folder_incl_ghs)
 frequencymaps= createFrequencyMap(masked_predictions_names)
 ## Optionally: make animated map that shows classification for each time step in order
 ## to visualize flood extent over time
+
+
+## STEP 5: Create difference maps
+## Create different maps of all consecutive sentinel-1 images
+## The function uses the stacks created in STEP 1
+## All the data will be stored in a folder which will be created called "DifferenceMaps"
+diff_map()
+
+
+

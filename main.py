@@ -31,6 +31,7 @@ from py.predict import predict, getAccuracy_ConfMatrix
 from py.postprocessing import createFrequencyMap
 from py.ClipAndMask import clipRaster, maskWater
 from py.loadDEM_GHS import addDEM_GHS
+from py.diff_function import diff_map
 
 #### Create folders and load file names
 #These folders should exist in your wd 

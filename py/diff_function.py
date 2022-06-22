@@ -80,7 +80,7 @@ def diff_map ():
 
 
 
-diff_map()
+
 
 
 
@@ -122,7 +122,7 @@ Misschien het combineren met het model van Niels en Raimon
 
 
 
-
+"""
 def open_diffmaps ():
     
     diff_map_folder = './data/DifferenceMaps'
@@ -338,7 +338,7 @@ plt.imshow(sum_diff_3_4)
             frequencymapUrban[flood_predictions==100] = 100
     
 
-
+"""
 
 
 

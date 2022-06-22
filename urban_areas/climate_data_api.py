@@ -10,13 +10,18 @@ import os, json, requests, csv
 
 
 ##### Define parameters #####
-locations =      [(18.9586, -72.528 )]       # Can define single or multiple points (lat, lon)
+locations =      [(19.73736, -72.206768 )]       # Can define single or multiple points (lat, lon)
 start =          20220101                    # Start data (yyyyMMdd)
 end =            20220501                    # End date (yyyyMMdd)
 output =         r"./Data/climate_data"      # Define folder where data is saved
 time_interval =  'daily'                     # hourly, daily, or monthly. Default is monthly
 file_format =    'CSV'                       # Format of file, CSV or JSON
 
+# Create output folder if it has not been created yet
+output_location = './data/climate_data'
+
+if not os.path.exists(output_location):
+    os.mkdir(output_location)
 
 ##### Define base_url based on time_interval #####
 if time_interval == 'hourly':

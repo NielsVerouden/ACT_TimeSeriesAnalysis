@@ -11,10 +11,12 @@ Source: https://power.larc.nasa.gov/
 # =============================================================================
 # STEP 0: IMPORT PACKAGES
 # =============================================================================
+import time
 import os
 import requests
 import csv
 import datetime
+start_time = time.time()
 
 # =============================================================================
 # STEP 1: DEFINE INPUT PARAMETERS
@@ -26,7 +28,7 @@ import datetime
 longitude = -72.206768
 latitude =  19.737036
 start = '2020-01-01'
-end = '2020-10-01'
+end = '2022-04-25'
 dest_name = "climate_data"  
 time_interval =  'daily'
 
@@ -55,6 +57,7 @@ def downloadClimateData (api_url, dest_name):
     
     # Define file name    
     file_name = download.headers['content-disposition'].split('filename=')[1]
+    file_name = file_name[0:35]+'.csv'
     
     # Read CSV file with line splitter
     cr = csv.reader(decoded_content.splitlines(), delimiter=',')
@@ -70,3 +73,4 @@ def downloadClimateData (api_url, dest_name):
 
 # Execute download climate data function
 downloadClimateData(api_url, dest_name)
+print(f"----- {round((time.time() - start_time), 2)} seconds -----")

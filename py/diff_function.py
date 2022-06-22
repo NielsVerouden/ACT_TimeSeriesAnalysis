@@ -1,15 +1,7 @@
 import rasterio as rio
 import os
 import matplotlib.pyplot as plt
-import numpy as np
-import geopandas as gpd
-from rasterio.mask import mask
-from shapely.geometry import box
-from glob import glob
-from rasterio.plot import plotting_extent
-import earthpy as et
-import earthpy.spatial as es
-import earthpy.plot as ep
+
 
 def diff_map ():
     
@@ -17,7 +9,7 @@ def diff_map ():
     input_folder = './data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
     output_location = './data/DifferenceMaps'
     
-    # Create output folder
+    # Create output folder if it has not been created yet
     if not os.path.exists(output_location):
         os.mkdir(output_location)
         
@@ -28,29 +20,35 @@ def diff_map ():
     list_files = os.listdir(input_folder)
     
     # Get the dates of all the input files
+    ## This is needed later for naming the files
     for i in range(0,len(list_files)):
         list_dates = list_files
         list_dates[i] = list_files[i][0:10]
     
     # Create a list of the files, because the former is overwritten
-    list_files = os.listdir(folder_location)
+    list_files = os.listdir(input_folder)
     
     # Substract rasters from each other
+    ## This will be done for all consecutive rasters due to the for loop
     for j in range(0, len(list_files)-1):
         
-        raster_name_1 = os.path.join(folder_location, list_files[j]) 
-        raster_name_2 = os.path.join(folder_location, list_files[j+1]) 
+        raster_name_1 = os.path.join(input_folder, list_files[j]) 
+        raster_name_2 = os.path.join(input_folder, list_files[j+1]) 
         
         raster_1 = rio.open(raster_name_1)
         raster_2 = rio.open(raster_name_2)
         
         diff_raster = raster_2.read()[0] - raster_1.read()[0]
         
+        ###################### This does not work #############################
         # Create only 0 and 1 values
         #diff_raster[diff_raster>20000] = 1
         #diff_raster[diff_raster<=20000] = 0
         
         # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
+        ## Create a function to do it
+        ## Only the parts that have big difference will be shown
+        ## This threshold can be changed, it is now set at 30000
         def diff_city (diff_raster):
             for i in range(0, len(diff_raster)):
                 for j in range(0, len(diff_raster[0])):
@@ -60,7 +58,9 @@ def diff_map ():
                         diff_raster[i][j] = 0
             return(diff_raster)
         
+        # Call the function
         diff_raster = diff_city(diff_raster)
+        
         
         # Create outputname
         dates = list_dates[j] +'_' + list_dates[j+1]
@@ -68,11 +68,9 @@ def diff_map ():
         diff_raster_filepath=os.path.join(output_location,output_name)
     
         # Open the metadata
-        #with rio.open(metadata_file,"r") as vv:
         meta=raster_1.meta
-        #vv_data=vv.read(1)
               
-        #Update meta to fit three layers
+        #Update metadata
         meta.update(count=1)
         meta.update(dtype=rio.float32)
         
@@ -94,6 +92,8 @@ Kan de backscatter in een stad afnemen? Dan zou het nadat het afgenomen is,
 wanneer het dan weer toeneemt gezien worden als een overstroming
 
 Het kunnen stacken moet nog kunnen
+
+Misschien het combineren met het model van Niels en Raimon
 
 
 """

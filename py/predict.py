@@ -49,10 +49,11 @@ def predict(folder, model, training_polys, dest_name="./data/FloodPredictions",
         
         #Helper function to convert numbers to string labels:
         def str_class_to_int(class_array):
-           class_array[class_array == np.unique(training_polys["Label"])[0]] = 0
-           class_array[class_array == np.unique(training_polys["Label"])[1]] = 1
-           class_array[class_array == np.unique(training_polys["Label"])[2]] = 2
-           return(class_array.astype(int))
+            class_array[class_array == 'Dry'] = 0
+            class_array[class_array == 'Flooded'] = 1
+            class_array[class_array == 'FloodedUrban'] = 2
+            return(class_array.astype(int))
+
         
         class_prediction = str_class_to_int(class_prediction)
         

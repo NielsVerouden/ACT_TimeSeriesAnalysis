@@ -70,14 +70,14 @@ def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samp
                     'criterion': 'gini',
                     'max_depth': 15,
                     'max_features': 0.5,
-                    'min_samples_leaf': 1}
+                    'min_samples_leaf': 3}
     rf = RandomForestClassifier(**parameters)     
     rf.fit(X,y)
     return rf   
 
 
 ### K-nearest neighbours
-def knn(X,y,n_neighbours=6):
+def knn(X,y,n_neighbours=3):
     print("Fitting K-Nearest Neighbours to input data ... Takes a few minutes")
     knn = KNeighborsClassifier(n_neighbors=n_neighbours)
     knn.fit(X, y)

@@ -71,17 +71,20 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
         with rio.open(image_path_vv,"r") as vv:
             meta=vv.meta
             vv_data=vv.read(1)
-        
+            vv_data = vv_data.astype('float32')
+            
         with rio.open(image_path_vh,"r") as vh:
             vh_data=vh.read(1)
-        
+            vh_data = vh_data.astype('float32')
+            
         #Optional: Lee speckle filter
         if lee:
             vv_data = lee_filter(vv_data, size)
             vh_data = lee_filter(vh_data, size)
-            
-        #vv_data /= np.amax(vv_data)
-        #vh_data /= np.amax(vh_data)
+         
+        #Scale to range 0-1    
+        vv_data /= np.amax(vv_data)
+        vh_data /= np.amax(vh_data)
         
         if normalize:
             """
@@ -106,21 +109,23 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
         #If the data is measured in decibels, it would have to be VV-VH
         # Division by zero returns a zero due to the where statement
                     #vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
-        vvvh_ratio = np.divide(vv_data, vh_data, out=np.zeros_like(vv_data), where=vh_data!=0)
+       # vvvh_ratio = np.divide(vv_data, vh_data, out=np.zeros_like(vv_data), where=vh_data!=0)
+        vvvh_sum = vv_data+vh_data
+        vvvh_dif = vv_data-vh_data
+        vvvh_index = np.divide(vvvh_dif,vvvh_sum,out=np.zeros_like(vvvh_sum), where=vvvh_sum!=0)
         # Replace outliers of the data by the median
-        vvvh_ratio=np.where(vvvh_ratio>5,np.median(vvvh_ratio),vvvh_ratio)
-        vvvh_ratio_rescaled = np.interp(vvvh_ratio, (vvvh_ratio.min(), vvvh_ratio.max()), (np.amin(vh_data), np.amax(vh_data)))
+       # vvvh_ratio=np.where(vvvh_ratio>5,np.median(vvvh_ratio),vvvh_ratio)
+        #vvvh_ratio_rescaled = np.interp(vvvh_ratio, (vvvh_ratio.min(), vvvh_ratio.max()), (np.amin(vh_data), np.amax(vh_data)))
 
         #Update meta to fit three layers
-        meta.update(count=3)
-        meta.update(dtype=rio.float32)
-        
+        meta.update(count=3,dtype=rio.float32)
+               
         stack_filename="%s_vv_vh_vvvhratio_Stack.tiff"%date
         stack_filepath=os.path.join(stack_dest_name,stack_filename)
         with rio.open(stack_filepath, "w",**meta) as dst:
-            dst.write_band(1,vv_data.astype(rio.float32))
-            dst.write_band(2,vh_data.astype(rio.float32))
-            dst.write_band(3,vvvh_ratio_rescaled)
+            dst.write_band(1,vv_data)
+            dst.write_band(2,vh_data)
+            dst.write_band(3,vvvh_index)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
     return
 

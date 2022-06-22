@@ -70,12 +70,7 @@ stacked_images_folder_incl_ghs='./data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
 
 ### Indicate preferences
 #Indicate whether all images and histograms need to be plotted:
-show_sentinel_histograms, show_sentinel_images = False, True
-
-#Change your preferred model according to your preferences:
-# Some models have additional parameters that can be adjusted to your liking
-options = ["GaussianNaiveBayes", "RandomForest", "K-NearestNeighbours", "SupportVectorMachine"]
-preferred_model = options[1] #Counting starts at zero !
+show_sentinel_histograms, show_sentinel_images = True, True
 
 ## STEP 1: Load data
 ## Unzip images from the input_folder to the images_folder
@@ -109,8 +104,8 @@ model, results,best_params = RandomForest_FindParams(X_train,y_train)
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
 #model = GaussianNaiveBayes(X_train,y_train)    
 model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
-#model= knn(X_train, y_train)
-#model = svm(X_train, y_train)    
+model= knn(X_train, y_train)
+model = svm(X_train, y_train)    
     
     
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,X_test, y_test)

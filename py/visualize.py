@@ -26,7 +26,8 @@ def show_histograms(folder):
         
                 axhist.set_title(title, size=60)
                 axhist.legend(list(src.descriptions), prop={'size': 40})
-                axhist.set_ylim([0,0.00005])
+                axhist.set_ylim([0,7.5])
+                axhist.set_xlim([0,1])
                 plt.show()
                 #optional: add code to save histograms in a folder
 

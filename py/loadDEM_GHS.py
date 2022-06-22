@@ -36,7 +36,7 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
     ghs_combis = clipRaster(sentinel_folder, ghs_path, GHSfolder, "GHS_Clipped") 
     dem_combis = clipRaster(sentinel_folder, dem_path, DEMfolder, "DEM_Clipped") 
 
-    #Resample to same resolution and stack as the Sentinel rasters
+    #Resample to same resolution and stack on the Sentinel rasters
     for date, ghs in ghs_combis.items(): 
         dem = dem_combis[date]
         
@@ -49,19 +49,20 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
         with rio.open(raster_name) as dst:
             raster=dst.read()
             meta=dst.meta.copy()
-            
+        
         #Open ghs data:
         with rio.open(ghs) as dst:
-            ghs_data=dst.read()
-        ghs_band=ghs_data[0]
-        ghs_band_resized = resize(ghs_band, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
+            ghs_data=dst.read(1).astype('float32')
+            ghs_data /= np.amax(ghs_data)
+
+        ghs_data_resized = resize(ghs_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
         
         #Open DEM data:
         with rio.open(dem) as dst:
-            dem_data=dst.read()
-        dem_band=dem_data[0]
-        
-        dem_band_resized = resize(dem_band, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
+            dem_data=dst.read(1).astype('float32')
+            dem_data /= np.amax(dem_data)
+               
+        dem_data_resized = resize(dem_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
 
         with rio.open(raster_name, "r") as dst:
             vv=dst.read(1)
@@ -76,11 +77,11 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
         filename="%s_Stack_vv_vh_vvvh_ghs_dem.tiff"%date
         path = os.path.join(output_folder,filename)
         with rio.open(path,"w",**meta) as dst:
-            dst.write_band(1,vv.astype(rio.float32))
-            dst.write_band(2,vh.astype(rio.float32))
-            dst.write_band(3,ratio.astype(rio.float32))
-            dst.write_band(4, ghs_band_resized.astype(rio.float32))
-            dst.write_band(5, dem_band_resized.astype(rio.float32))
+            dst.write_band(1,vv)
+            dst.write_band(2,vh)
+            dst.write_band(3,ratio)
+            dst.write_band(4, ghs_data_resized)
+            dst.write_band(5, dem_data_resized)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio',"Population","DEM"])
     return   
 

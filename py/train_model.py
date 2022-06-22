@@ -6,14 +6,21 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.utils import class_weight
 import numpy as np
+from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
+import pandas as pd
 
-#### GaussianNaiveBayes Classifier
+#Helper function for random forest to create a dict with class weights
+def constructDict(arr):
+    #Create a dictionary with the class weights
+    dict = {"Dry":arr[0],
+                          "Flooded":arr[1],
+                          "FloodedUrban":arr[2]}
+    return dict
+
+#Possible models:
+    #### GaussianNaiveBayes Classifier
 def GaussianNaiveBayes(X,y):
     print("Fitting GaussianNaiveBayes Classifier to input data ... ")
-    class_weights = {"Dry":1,
-                     "Flooded":20,
-                     "FloodedUrban":20}
-    #GNB can't deal with class weights?
     gnb = GaussianNB()
     gnb.fit(X, y)
 
@@ -23,26 +30,49 @@ def GaussianNaiveBayes(X,y):
 
 
 #### Random Forest
-def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
-    print("Fitting Random Forest to input data ... ")
-    class_weights = {"Dry":1,
-                     "Flooded":200,
-                     "FloodedUrban":200}
-    rf = RandomForestClassifier(n_estimators=n_estimators,
-                                criterion=criterion,        #"gini", "entropy", "log_loss"
-                                max_depth=max_depth,        #None or an integer value
-                                class_weight="balanced")     #Add class weights (dict or 'balanced')
-    """
+def RandomForest_FindParams(X,y):
+    print("Finding the best parameters for Random Forest ... ")
     #Class weights to balance for the different amounts of pixels in each class
     class_weights = class_weight.compute_class_weight('balanced',
                                                  classes=np.unique(y),
                                                  y=y)
-    """
-    rf.fit(X,y)
-    return rf                            
+    #Manuall increase the class weights of the flooded classes since they are more important
+    class_weights_mod = class_weights* [1, 5, 5]
+    class_weights_extr = class_weights* [1, 10, 10]
+    
+    class_dict_mod = constructDict(class_weights_mod)
+    class_dict_extr = constructDict(class_weights_extr)
+    
+    param_grid = {'min_samples_leaf':[1,3],'max_features':[0.5,'sqrt','log2'],
+              'max_depth':[10,15,20],
+              'class_weight':[None, 'balanced', class_dict_mod, class_dict_extr],
+              'criterion':['gini']}
+    
+    sss = StratifiedShuffleSplit(n_splits=5)
+    grid = GridSearchCV(RandomForestClassifier(),param_grid,cv=sss,verbose=1,n_jobs=-1,return_train_score=True)
+    grid.fit(X,y) 
+    
+    results_dict = grid.cv_results_
+    results=pd.DataFrame.from_dict(results_dict)
+    best_params = grid.best_params_
+    pd.DataFrame.to_csv(results,"./data/RandomForestCV_Results.csv")
+    
+    rf=RandomForestClassifier(**best_params)
+    best_model=rf.fit(X,y)
+    return best_model, results, best_params
+                 
 #see the following link for all random forest options:
 #https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html
     
+def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
+    print("Fitting Random Forest to input data ... ")
+    rf = RandomForestClassifier(n_estimators=n_estimators,
+                                criterion=criterion,        #"gini", "entropy", "log_loss"
+                                max_depth=max_depth,        #None or an integer value
+                                class_weight="balanced")     #Add class weights (dict or 'balanced')
+    rf.fit(X,y)
+    return rf   
+
 
 ### K-nearest neighbours
 def knn(X,y,n_neighbours=6):
@@ -61,3 +91,7 @@ def svm(X,y,C=3, kernel="poly", degree=4):
     svm.fit(X, y)
     return svm
 #https://towardsdatascience.com/land-cover-classification-in-satellite-imagery-using-python-ae39dbf2929
+
+
+        
+        

@@ -105,7 +105,7 @@ def getAccuracy_ConfMatrix(model,x,y_true):
                                "Flooded Land",
                                "Flooded Urban"])
     df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
-    print("="*60,"\n",df,"\n", "="*60)
+    print("="*60,"\n",df,"\n", "="*60,"\n","Overall test accuracy = %.2f"%acc)
     return(acc,df,cm)
 
 

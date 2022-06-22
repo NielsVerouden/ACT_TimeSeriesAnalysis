@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 
 
-def diff_map (raster_stack, polarization):
+def diff_map (raster_stack, polarization, threshold):
     
     # Load raster stacks as input
     input_folder = raster_stack
@@ -57,8 +57,8 @@ def diff_map (raster_stack, polarization):
         
         ###################### This does not work #############################
         # Create only 0 and 1 values
-        #diff_raster[diff_raster>20000] = 1
-        #diff_raster[diff_raster<=20000] = 0
+        #diff_raster[0][diff_raster[0]>30000] = 1
+        #diff_raster[0][diff_raster[0]<=30000] = 0
         
         # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
         ## Create a function to do it
@@ -67,7 +67,7 @@ def diff_map (raster_stack, polarization):
         def diff_city (diff_raster):
             for i in range(0, len(diff_raster)):
                 for j in range(0, len(diff_raster[0])):
-                    if diff_raster[i][j] > 30000:
+                    if diff_raster[i][j] > threshold:
                         diff_raster[i][j] = 1
                     else:
                         diff_raster[i][j] = 0
@@ -112,13 +112,6 @@ Misschien het combineren met het model van Niels en Raimon
 
 
 """
-
-
-
-
-
-
-
 
 
 

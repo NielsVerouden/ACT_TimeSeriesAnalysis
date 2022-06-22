@@ -147,7 +147,7 @@ frequencymaps= createFrequencyMap(masked_predictions_names)
 ## The polarization which is wanted to create difference map from has to be entered as well:
 ### Options are: 'vv', 'vh', and 'ratio'. If another string is entered, the 'vv' will be runned.
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
-diff_map(stacked_images_folder_incl_ghs, 'vv')
+diff_map(stacked_images_folder_incl_ghs, 'vv', 20000)
 
 
 

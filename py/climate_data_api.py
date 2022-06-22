@@ -27,6 +27,7 @@ start_time = time.time()
 # to the 'dest_name' folder in the 'data' folder. The standard dest_name is 
 # climate_data, so data is stored in "./data/climate_date/___.csv".
 
+# Input parameters: EXAMPLE
 longitude = -72.206768
 latitude =  19.737036
 start = '2020-01-01'
@@ -34,21 +35,27 @@ end = '2022-04-25'
 dest_name = "climate_data"  
 time_interval =  'daily'
 
-# =============================================================================
-# STEP 2: DEFINE URL AND CONVERT START AND END DATE
-# =============================================================================
-start = datetime.datetime.strptime(start, '%Y-%m-%d')
-start = int(start.strftime("%Y%m%d"))
 
-end = datetime.datetime.strptime(end, '%Y-%m-%d')
-end = int(end.strftime("%Y%m%d"))
 
-api_url = f"https://power.larc.nasa.gov/api/temporal/{time_interval}/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format=CSV"
 
 # =============================================================================
 # STEP 1: DOWNLOAD CLIMATE DATA
 # =============================================================================
-def downloadClimateData (api_url, dest_name):
+def downloadClimateData (longitude, latitude, start, end, dest_name, time_interval):
+    
+    # Create the api_url to download the data
+    api_url = f"https://power.larc.nasa.gov/api/temporal/{time_interval}/point?parameters=WS10M,WD10M,T2MDEW,T2MWET,T2M,V10M,RH2M,PS,PRECTOT,QV2M,U10M&community=RE&longitude={longitude}&latitude={latitude}&start={start}&end={end}&format=CSV"
+
+    # =============================================================================
+    # STEP 2: DEFINE URL AND CONVERT START AND END DATE
+    # =============================================================================
+    start = datetime.datetime.strptime(start, '%Y-%m-%d')
+    start = int(start.strftime("%Y%m%d"))
+
+    end = datetime.datetime.strptime(end, '%Y-%m-%d')
+    end = int(end.strftime("%Y%m%d"))
+    
+    
     # Create directory
     if not os.path.exists(os.path.join('data',dest_name)):
         os.makedirs(os.path.join('data',dest_name))
@@ -80,8 +87,8 @@ def downloadClimateData (api_url, dest_name):
     return(climate_data_folder)
 
 # Execute download climate data function
-cl_dat_fol = downloadClimateData(api_url, dest_name)
-print(f"----- {round((time.time() - start_time), 2)} seconds -----")
+#cl_dat_fol = downloadClimateData(api_url, dest_name)
+#print(f"----- {round((time.time() - start_time), 2)} seconds -----")
 
 
 
@@ -123,9 +130,7 @@ def get_climate_data(input_folder):
     # Remove the columns "YEAR", "MO", and "DY"
     climate_data = climate_data[["prec", "date"]]
     return(climate_data)
-    
-# Call function
-df = get_climate_data(cl_dat_fol)
+
 
 
 

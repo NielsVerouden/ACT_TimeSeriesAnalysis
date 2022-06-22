@@ -14,20 +14,21 @@ def show_histograms(folder):
     filenames_sorted = sorted(filenames)
     
     for id, filename in enumerate(filenames_sorted):
-        filepath=os.path.join(folder, filename)
-        title = str(filename[0:10]) #date
-        
-        with rio.open(filepath,'r') as src:
-
-            fig, axhist = plt.subplots(1, 1, figsize=(20, 20))
-            show_hist(src, ax=axhist, bins=100, lw=0.0, stacked=False, 
-                      alpha=0.3, histtype='stepfilled', density=True)
+        if filename.endswith("tiff"):
+            filepath=os.path.join(folder, filename)
+            title = str(filename[0:10]) #date
+            
+            with rio.open(filepath,'r') as src:
     
-            axhist.set_title(title, size=60)
-            axhist.legend(list(src.descriptions), prop={'size': 40})
-            axhist.set_ylim([0,0.00005])
-            plt.show()
-            #optional: add code to save histograms in a folder
+                fig, axhist = plt.subplots(1, 1, figsize=(20, 20))
+                show_hist(src, ax=axhist, bins=100, lw=0.0, stacked=False, 
+                          alpha=0.3, histtype='stepfilled', density=True)
+        
+                axhist.set_title(title, size=60)
+                axhist.legend(list(src.descriptions), prop={'size': 40})
+                axhist.set_ylim([0,0.00005])
+                plt.show()
+                #optional: add code to save histograms in a folder
 
 def show_backscatter(folder):
     filenames = os.listdir(folder)
@@ -38,29 +39,30 @@ def show_backscatter(folder):
         return (array - array_min) / (array_max - array_min)
     
     for id, filename in enumerate(filenames_sorted):
-        filepath=os.path.join(folder, filename)
-        title = str(filename[0:10]) #select date as title
-        with rio.open(filepath,'r') as src:
-            #show(src,title=title, transform=src.transform, adjust='linear')
-            
-            #Read bands
-            vv=src.read(1)
-            vh=src.read(2)
-            ratio=src.read(3)
-
-            #Normalize values to enable RGB plotting
-            vv_norm = normalize(vv)
-            vh_norm = normalize(vh)
-            ratio_norm = normalize(ratio)
-            
-            #Stack normalized arrays
-            stck = np.dstack((vv_norm,vh_norm,ratio_norm))
-            
-            #Open new plotting device and show image
-            plt.figure()
-            plt.imshow(stck)
-            plt.suptitle(title)
-            plt.show()
+        if filename.endswith("tiff"):
+            filepath=os.path.join(folder, filename)
+            title = str(filename[0:10]) #select date as title
+            with rio.open(filepath,'r') as src:
+                #show(src,title=title, transform=src.transform, adjust='linear')
+                
+                #Read bands
+                vv=src.read(1)
+                vh=src.read(2)
+                ratio=src.read(3)
+    
+                #Normalize values to enable RGB plotting
+                vv_norm = normalize(vv)
+                vh_norm = normalize(vh)
+                ratio_norm = normalize(ratio)
+                
+                #Stack normalized arrays
+                stck = np.dstack((vv_norm,vh_norm,ratio_norm))
+                
+                #Open new plotting device and show image
+                plt.figure()
+                plt.imshow(stck)
+                plt.suptitle(title)
+                plt.show()
 
 ######Visualize predictions:
 def visualizePrediction(masked_predictions_names, input_folder):

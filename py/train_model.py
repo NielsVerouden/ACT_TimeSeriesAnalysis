@@ -55,7 +55,7 @@ def RandomForest_FindParams(X,y):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
-    pd.DataFrame.to_csv(results,"./data/RandomForestCV_Results.csv")
+    pd.DataFrame.to_csv(results,"./data/RandomForestCV_Results.csv",mode='w+')
     
     rf=RandomForestClassifier(**best_params)
     best_model=rf.fit(X,y)
@@ -66,10 +66,12 @@ def RandomForest_FindParams(X,y):
     
 def RandomForest(X,y, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
     print("Fitting Random Forest to input data ... ")
-    rf = RandomForestClassifier(n_estimators=n_estimators,
-                                criterion=criterion,        #"gini", "entropy", "log_loss"
-                                max_depth=max_depth,        #None or an integer value
-                                class_weight="balanced")     #Add class weights (dict or 'balanced')
+    parameters= {'class_weight': None,      #Add class weights (dict or 'balanced' or None)
+                    'criterion': 'gini',
+                    'max_depth': 15,
+                    'max_features': 0.5,
+                    'min_samples_leaf': 1}
+    rf = RandomForestClassifier(**parameters)     
     rf.fit(X,y)
     return rf   
 

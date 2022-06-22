@@ -54,7 +54,7 @@ def loadTrainingData(training_folder):
 
                 # reshape the array to [pixel count, bands]
                 out_image_reshaped = out_image.reshape(-1, band_count)
-                
+            
                 # append the labels to the y array
                 y = np.append(y,[polys["Label"][index]] * out_image_reshaped.shape[0]) 
                 # stack the pizels onto the pixel array
@@ -70,7 +70,7 @@ def loadTrainingData(training_folder):
     print('Our y array is sized: {sz}'.format(sz=y.shape))
     """
     #After the for-loop, we have two arrays: X and y
-    #X has all pixel values of the 3 bands
+    #X has all pixel values of the 5 bands
     #y has the labels per pixels
     
     #We randomly split X and y in training and test datasets

@@ -80,6 +80,9 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
             vv_data = lee_filter(vv_data, size)
             vh_data = lee_filter(vh_data, size)
             
+        #vv_data /= np.amax(vv_data)
+        #vh_data /= np.amax(vh_data)
+        
         if normalize:
             """
             Not recommended 

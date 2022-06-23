@@ -86,6 +86,39 @@ def predict(folder, model, training_polys, dest_name="./data/FloodPredictions",
         
     return(predictions, preds_filenames)
 
+def getAccuracy_ConfMatrix(model,test_data):
+    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
+    #Load X and y data
+    Xtest = test_data[predictor_cols].values.tolist()
+    ytest = test_data['Label']
+    
+    #Predict y based on x
+    y_pred = model.predict(Xtest)
+    
+    #Obtain accuracy score and create confusion matrix
+    acc = accuracy_score(ytest, y_pred)
+    cm = confusion_matrix(ytest, y_pred)
+    plt.figure()
+    ConfusionMatrixDisplay(cm).plot()
+    plt.show()
+    #Create arrays containing the user and producer accuracies
+    #Divide the N of classified cases by the amount of predicted cases (-> user acc)
+    users_accs = cm.diagonal()/np.sum(cm,axis=0,keepdims=False)
+    
+    #Divide the N of classified cases by the amount of actual cases (-> producer acc)
+    #Axis=1 -> horizontal sum (in the confusion matrix)
+    producers_accs = cm.diagonal()/np.sum(cm,axis=1,keepdims=False)
+    
+    df = pd.DataFrame(np.array([users_accs,producers_accs]),
+                      columns=["Dry Area",
+                               "Flooded Land",
+                               "Flooded Urban"])
+    df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
+    print("="*60,"\n",df,"\n", "="*60,"\n","Overall test accuracy = %.2f"%acc)
+    return(acc,df,cm)
+
+"""
+#Formerly used:
 def getAccuracy_ConfMatrix(model,x,y_true):
     y_pred = model.predict(x)
     acc = accuracy_score(y_true, y_pred)
@@ -108,6 +141,6 @@ def getAccuracy_ConfMatrix(model,x,y_true):
     df.insert(0, "Metric", ["User's Accuracy","Producer's Accuracy"])
     print("="*60,"\n",df,"\n", "="*60,"\n","Overall test accuracy = %.2f"%acc)
     return(acc,df,cm)
-
+"""
 
 

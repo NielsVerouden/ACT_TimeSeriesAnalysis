@@ -23,7 +23,7 @@ def lee_filter(img, size):
     img_output = img_mean + img_weights * (img - img_mean)
     return img_output
 
-def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,size=5):
+def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
 #input_name =  folder containing multiple zip folders
 # dest_name =  destination folder of files from zip folders
 # stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
@@ -86,20 +86,6 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
         vv_data /= np.amax(vv_data)
         vh_data /= np.amax(vh_data)
         
-        if normalize:
-            """
-            Not recommended 
-            vv_min = vv_data.min(axis=(0, 1), keepdims=True)
-            vv_max = vv_data.max(axis=(0, 1), keepdims=True)
-            vv_data = (vv_data - vv_min)/(vv_max - vv_min)
-            
-            vh_min = vh_data.min(axis=(0, 1), keepdims=True)
-            vh_max = vv_data.max(axis=(0, 1), keepdims=True)
-            vh_data = (vh_data - vh_min)/(vh_max - vh_min)
-            
-            vv_data=normalize(vv_data)
-            vh_data=normalize(vh_data)
-            """ 
               #Calculate ratio as third band:
         #np.seterr(divide='ignore', invalid='ignore')
         #vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
@@ -110,8 +96,8 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
         # Division by zero returns a zero due to the where statement
                     #vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
        # vvvh_ratio = np.divide(vv_data, vh_data, out=np.zeros_like(vv_data), where=vh_data!=0)
-        vvvh_sum = vv_data+vh_data
-        vvvh_dif = vv_data-vh_data
+        vvvh_sum = np.add(vv_data,vh_data)
+        vvvh_dif = np.subtract(vv_data,vh_data)
         vvvh_index = np.divide(vvvh_dif,vvvh_sum,out=np.zeros_like(vvvh_sum), where=vvvh_sum!=0)
         # Replace outliers of the data by the median
        # vvvh_ratio=np.where(vvvh_ratio>5,np.median(vvvh_ratio),vvvh_ratio)
@@ -127,6 +113,14 @@ def load_data(input_name, dest_name, stack_dest_name, normalize=False, lee=True,
             dst.write_band(2,vh_data)
             dst.write_band(3,vvvh_index)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
+    """
+    print(vv_data[0:10])
+    print("\n")
+    print(vh_data[0:10])
+    print("\n")
+    print(vvvh_index[0:10])
+    print("\n")
+    """
     return
 
 #credit for function lee_filter: https://stackoverflow.com/questions/39785970/speckle-lee-filter-in-python

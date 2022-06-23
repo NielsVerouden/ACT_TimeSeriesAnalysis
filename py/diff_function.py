@@ -10,7 +10,7 @@ def diff_map (raster_stack, polarization, threshold):
     input_folder = raster_stack
     
     # Set the output folder
-    output_location = './data/DifferenceMaps'
+    output_location = './data/DifferenceMaps/rasters'
     
     # Create output folder if it has not been created yet
     if not os.path.exists(output_location):
@@ -95,8 +95,59 @@ def diff_map (raster_stack, polarization, threshold):
         
         with rio.open(diff_raster_filepath, "w",**meta) as dst:
             dst.write_band(1,diff_raster.astype(rio.float32))
-    return
-
+            
+        
+        
+    ## Create a list of all the difference maps
+    list_diff_maps = os.listdir(output_location)
+    
+    # Create the path for opening the file
+    # "[0:21]" is needed to remove the "rasters" part of the string,
+    # because the files are in "./data/DifferenceMaps"
+    diff_map = os.path.join(output_location, list_diff_maps[0])
+    
+    # Open the difference map
+    diff_map_freq = rio.open(diff_map)
+    
+    # Read the difference map
+    diff_map_freq = diff_map_freq.read()[0]
+    
+    # Open the difference maps
+    # BE AWARE: it starts at 1 and not at 0, because the first difference
+    # map is opened above and should not be added again.
+    for i in range(1, len(list_diff_maps)):
+        
+        # Create the path for opening the file
+        # "[0:21]" is needed to remove the "rasters" part of the string,
+        # because the files are in "./data/DifferenceMaps"
+        add_diff_map = os.path.join(output_location, list_diff_maps[i]) 
+        
+        # Open the difference map
+        add_diff_map = rio.open(add_diff_map)
+        
+        # Read the difference map
+        add_diff_map = add_diff_map.read()[0]
+        
+        # Add the add_diff_map to the diff_map_freq to create a frequency map
+        diff_map_freq += add_diff_map
+        
+        
+        
+        
+    # Create output name for the difference map frequency map
+    # Get the first and last date
+    first_date = min(list_dates)
+    last_date = max(list_dates)
+    
+    # Create the total timespan
+    tot_dates = first_date + '_' + last_date
+        
+    output_diff_map_freq = os.path.join(output_location[0:21], '%sdiff_freq_map.tiff' %tot_dates)
+        
+    with rio.open(output_diff_map_freq, "w",**meta) as dst:
+            dst.write_band(1,diff_map_freq.astype(rio.float32))
+            
+    return diff_map_freq
 
 
 

@@ -33,45 +33,37 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
     dem_path = os.path.join(DEMfolder, dem_filename)            
       
     #Load the GHS and crop to extent of images in the sentinel folder
-    ghs_combis = clipRaster(sentinel_folder, ghs_path, GHSfolder, "GHS_Clipped") 
-    dem_combis = clipRaster(sentinel_folder, dem_path, DEMfolder, "DEM_Clipped") 
+    clipRaster(sentinel_folder, ghs_path, GHSfolder, "GHS_Clipped") 
+    clipRaster(sentinel_folder, dem_path, DEMfolder, "DEM_Clipped") 
 
     #Resample to same resolution and stack on the Sentinel rasters
-    for date, ghs in ghs_combis.items(): 
-        dem = dem_combis[date]
+    for sentinel_filename in os.listdir(sentinel_folder):
+        date = sentinel_filename[0:10] #Save the date
         
-        pattern = "%s\\*%s*.tiff" % (sentinel_folder,date)
-        for file in glob.glob(pattern):
-            raster_name= file
-            
-        #Open Sentinel image of the specified date:
-        #Also copy metadata for later use
-        with rio.open(raster_name) as dst:
+        #Open Sentinel image and copy metadata for later use
+        with rio.open(os.path.join(sentinel_folder, sentinel_filename)) as dst:
             raster=dst.read()
-            meta=dst.meta.copy()
-        
-        #Open ghs data:
-        with rio.open(ghs) as dst:
-            ghs_data=dst.read(1).astype('float32')
-            ghs_data /= np.amax(ghs_data)
-
-        ghs_data_resized = resize(ghs_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
-        
-        #Open DEM data:
-        with rio.open(dem) as dst:
-            dem_data=dst.read(1).astype('float32')
-            dem_data /= np.amax(dem_data)
-               
-        dem_data_resized = resize(dem_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
-
-        with rio.open(raster_name, "r") as dst:
             vv=dst.read(1)
             vh=dst.read(2)
             ratio=dst.read(3)
+            meta=dst.meta.copy()
             
-         #Rescale values to common range (eases training a model)   
-        #dem_band_rescaled = np.interp(dem_band_resized, (dem_band_resized.min(), dem_band_resized.max()), (np.amin(vv), np.amax(vv)))
-        #ghs_band_rescaled= np.interp(ghs_band_resized, (ghs_band_resized.min(), ghs_band_resized.max()), (np.amin(vv), np.amax(vv)))
+        #These are the filepaths to the DEM and GHS files corresponding to
+        #the date of the Sentinel image
+        DEMpath = os.path.join(DEMfolder, "DEM_Clipped_%s.tiff" %date)
+        GHSpath = os.path.join(GHSfolder, "GHS_Clipped_%s.tiff" %date)
+                
+        #Open ghs data:
+        with rio.open(GHSpath) as dst:
+            ghs_data=dst.read(1).astype('float32')
+            ghs_data /= np.amax(ghs_data)
+        ghs_data_resized = resize(ghs_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
+        
+        #Open DEM data:
+        with rio.open(DEMpath) as dst:
+            dem_data=dst.read(1).astype('float32')
+            dem_data /= np.amax(dem_data)
+        dem_data_resized = resize(dem_data, (raster.shape[1], raster.shape[2]), anti_aliasing=True)          
 
         meta.update(count=5, dtype=rio.float32)
         filename="%s_Stack_vv_vh_vvvh_ghs_dem.tiff"%date

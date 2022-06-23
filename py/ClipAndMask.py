@@ -15,7 +15,7 @@ import glob
 
 
 def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder, output_name):
-    dic = {}
+    
     if not os.path.exists(output_folder): os.makedirs(output_folder)
 
     #for bounding_raster_name in bounding_raster_names:
@@ -60,30 +60,31 @@ def clipRaster(bounding_rasters_folder, raster_to_be_clipped_name, output_folder
         output_path=os.path.join(output_folder,compl_output_name)
         with rio.open(output_path, "w", **raster_meta) as dest:
             dest.write(out_img)
-        dic[bounding_raster_name[0:10]]=output_path
+        
         raster.close()
         boundingraster.close()
-    return dic
-#clipRaster(sentinel_name, water, output_name)
+    return 
 
 
-def maskWater(combinations_dict,dest_folder,mask_value=0):
-    masked_filenames=[]
-    new_dict={} #dates and masked predictions
+def maskWater(predictions_folder,waterbodies_folder, dest_folder,mask_value=0):
     if not os.path.exists(dest_folder): os.makedirs(dest_folder)
-    #Loop over each combination from the dictionary:
-    for date, water_name in combinations_dict.items():
-        #Look for the file in the prediction  folder
-        #that corresponds to the key/value pair in the dictionary
-        pattern = '.\data\\FloodPredictions\\FloodPrediction_%s*.tiff' % date
+    
+    for prediction_raster in os.listdir(predictions_folder):
+        prediction_path = os.path.join(predictions_folder, prediction_raster)
+        
+        #The data is in the last characters of the filename (before .tiff)
+        date = prediction_raster[-15:-5]
+        #Look for the file in the water bodies  folder
+        #that corresponds to the date of the prediction
+        pattern = os.path.join(waterbodies_folder, "WaterBodiesCrop_%s.tiff" %date)
         for file in glob.glob(pattern):
-            raster_name= file
+            water_name= file
         
         with rio.open(water_name) as dst:
             water_data=dst.read()
             #water_meta = dst.meta
             
-        with rio.open(raster_name) as dst:
+        with rio.open(prediction_path) as dst:
             raster =  dst.read()
             raster_meta=dst.meta
             
@@ -113,13 +114,12 @@ def maskWater(combinations_dict,dest_folder,mask_value=0):
             raster[i][water_binary_resized[0]==1]=mask_value
         
         # Save the rasters as tif
-        output_name="MaskedPrediction_%s.tiff"%raster_name[40:50]
+        output_name="MaskedPrediction_%s.tiff"%date
         outputpath = os.path.join(dest_folder,output_name)
+        print(outputpath)
         with rio.open(outputpath, 'w', **raster_meta) as dst:
             dst.write(raster.astype(rio.float32))
-        masked_filenames.append(outputpath)
-        new_dict[date]=outputpath
-    return masked_filenames
+    return 
 """
 raster_name = "FloodPredictions//FloodPrediction_2021-04-02.tiff"
 water_name = "WaterBodies//occurrence_80W_20Nv1_3_2020_Cropped.tiff"

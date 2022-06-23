@@ -66,18 +66,31 @@ def show_backscatter(folder):
                 plt.show()
 
 ######Visualize predictions:
-def visualizePrediction(masked_predictions_names, input_folder):
-    for filename in masked_predictions_names:
-        date=filename[48:58]
+def visualizePrediction(masked_predictions_folder, input_folder):
+    """
+    Parameters
+    ----------
+    masked_predictions_folder : String
+    input_folder : String
+    -------
+    Plots flood predictions alongside input images
+    -------
+    """
+    for filename in os.listdir(masked_predictions_folder):
+        masked_prediction_path = os.path.join(masked_predictions_folder, filename)
+        #Get the date from the last characters of the file (before .tiff)
+        date=filename[-15:-5]
         
         #search for files in the directory with stacked images
         pattern = '%s/*%s*.tiff' % (input_folder,date)
         for file in glob.glob(pattern):
             image_path = file
         
-        with rio.open(filename) as prediction_src:
+        #Open tiff file containing prediction
+        with rio.open(masked_prediction_path) as prediction_src:
             prediction=prediction_src.read()
-            
+        
+        #Open input Sentinel image
         with rio.open(image_path) as src:
             # may need to reduce this image size if your kernel crashes, takes a lot of memory
             img = src.read()

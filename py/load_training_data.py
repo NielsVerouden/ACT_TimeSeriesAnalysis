@@ -45,11 +45,10 @@ def loadTrainingData(training_folder, test_size=0.7):
         df = gpd.read_file(pointfile) #Create geodataframe from the points
         stats = ['mean'] 
         
-        with rio.open(sentinel_location) as src:
+        with rio.open(sentinel_location, "r+") as src:
             transform = src.transform
             names=src.descriptions
             band_count = src.count
-            
             #For each band, calculate the mean pixel values using zonal statistics
             #Put these means in a dataframe called df2
             #Then, join this dataframe to df, which contains the information from the shapefile

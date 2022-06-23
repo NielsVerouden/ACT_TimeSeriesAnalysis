@@ -30,7 +30,6 @@ def Linear_SVC(training_data):
 # =============================================================================
 # GaussianNaiveBayes Classifier
 def GaussianNaiveBayes(training_data):
-    print("Fitting GaussianNaiveBayes Classifier to input data ... ")
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
     X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
     y = training_data['Label'].tolist() #The 3 classes
@@ -40,7 +39,6 @@ def GaussianNaiveBayes(training_data):
 # =============================================================================
 # Random forest
 def RandomForest(training_data, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
-    print("Fitting Random Forest to input data ... ")
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
     X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
     y = training_data['Label'].tolist() #The 3 classes
@@ -56,7 +54,6 @@ def RandomForest(training_data, n_estimators=100, criterion="gini",max_depth=Non
 # =============================================================================
 # K-nearest neighbours
 def knn(training_data,n_neighbours=3):
-    print("Fitting K-Nearest Neighbours to input data ... Takes a few minutes")
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
     X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
     y = training_data['Label'].tolist() #The 3 classes
@@ -67,7 +64,6 @@ def knn(training_data,n_neighbours=3):
 # =============================================================================
 # Support vector machine
 def svm(training_data,C=3, kernel="poly", degree=4):
-    print("Fitting Support Vector Machine to input data ... Takes a few minutes")
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
     X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
     y = training_data['Label'].tolist() #The 3 classes

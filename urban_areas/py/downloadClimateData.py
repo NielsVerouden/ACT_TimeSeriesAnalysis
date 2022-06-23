@@ -13,7 +13,7 @@ import requests
 import csv
 import datetime
 import pandas as pd
-import seaborn as sns
+
 
 def downloadClimateData(lon, lat, start, end, dest_name, time_interval, sum_days):
     # =============================================================================

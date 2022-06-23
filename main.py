@@ -95,20 +95,20 @@ if show_sentinel_images:
 
 ##STEP 3: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
-X_train, X_test, y_train, y_test, training_polys = loadTrainingData(training_folder)
-visualizeData(X_train, y_train)
+trainingdata, testdata = loadTrainingData(training_folder)
+#visualizeData(X_train, y_train)
 
 #Find the best parameters for random forest using a cross validation approach
-model, results,best_params = RandomForest_FindParams(X_train,y_train)
+model, results,best_params = RandomForest_FindParams(trainingdata)
 #Train a random forest classifier
 #And estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
-#model = GaussianNaiveBayes(X_train,y_train)    
-model = RandomForest(X_train, y_train) #See train_model.py for additional parameters
-model= knn(X_train, y_train)
-model = svm(X_train, y_train)    
+model = GaussianNaiveBayes(trainingdata)    
+model = RandomForest(trainingdata) #See train_model.py for additional parameters
+model= knn(trainingdata)
+model = svm(trainingdata)    
     
     
-test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,X_test, y_test)
+test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 
 #Predict flooded areas
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area

@@ -5,9 +5,9 @@
 ||  POWER API SINGLE-POINT DOWNLOAD   ||
 || Version: 2.0 Published: 2021/03/09 ||
 || Optimized for multi-point data     ||
-This is an overview of the process to request data from a single data point 
-from the POWER API. The input parameters should be defined in the main folder
-of the urban data (-> define input parameters).
+This is an overview of the process to request data from a grid of data points
+around a coordinate from the POWER API. The input parameters should be defined 
+in the main script for downloading the climate data from the API.
 
 Source: https://power.larc.nasa.gov/
 '''
@@ -22,8 +22,8 @@ def climateDataAPI(longitude, latitude, start, end):
     steps = 3
 
     # Create directory
-    if not os.path.exists(os.path.join('data')):
-        os.makedirs(os.path.join('data'))
+    if not os.path.exists(os.path.join('data', 'precipitation_data')):
+        os.makedirs(os.path.join('data', 'precipitation_data'))
     
     # Define start and end date
     start = datetime.datetime.strptime(start, '%Y-%m-%d')
@@ -75,7 +75,7 @@ def climateDataAPI(longitude, latitude, start, end):
         cr = csv.reader(decoded_content.splitlines(), delimiter=',')
     
         # Create path_name and open file
-        path_name = os.path.join('data', file_name)
+        path_name = os.path.join('data', 'precipitation_data', file_name)
         file = open(path_name, 'w+', newline ='')
     
         # Write CSV file to directory

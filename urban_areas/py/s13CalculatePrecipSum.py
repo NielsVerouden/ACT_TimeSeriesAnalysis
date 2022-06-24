@@ -3,7 +3,7 @@
 # =============================================================================
 import os
 
-def sumAverages(dest_name, df_total, sum_days):
+def calculatePrecipSum(dest_name, df_total, sum_days):
     # Create new dataframe to work with
     df_sum = df_total[["average_(mm/day)"]].copy()
     
@@ -43,8 +43,9 @@ def sumAverages(dest_name, df_total, sum_days):
     
     ### Write final df to files
     # csv_name = os.path.join('data', dest_name, f'average_daily_precipitation_{file_names[0][5:23]}.csv')
-    csv_path = os.path.join('data', f'daily_precipitation_avg{sum_days}days_{dest_name}.csv')
+    csv_path = os.path.join('data', 'precipitation_data', f'daily_precipitation_avg{sum_days}days_{dest_name}.csv')
     df_total.to_csv(csv_path, encoding='utf-8', index=False)
     
+    print(f'\nThe data can be found in:\n"{csv_path}"')
     
     return df_total, csv_path

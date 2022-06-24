@@ -13,8 +13,7 @@ def diff_map (raster_stack, polarization, threshold):
     output_location = './data/DifferenceMaps/rasters'
     
     # Create output folder if it has not been created yet
-    if not os.path.exists(output_location):
-        os.mkdir(output_location)
+    if not os.path.exists(output_location): os.mkdir(output_location)
         
     # List the files in the directory
     list_files = os.listdir(input_folder)

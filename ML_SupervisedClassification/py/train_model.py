@@ -1,13 +1,19 @@
-# Train a machine learning model
+# Below you find various functions to train a Machine Learning algorithm to detect floods
+# The functions are aranged from least to most complex
+# All except GNB perform 5-fold cross-validation and a grid search to find the optimal parameters
+# This may take a while, esp. if the amount of training data is very large
+import os
+import numpy as np
+import pandas as pd
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.svm import LinearSVC
 from sklearn.svm import SVC
 from sklearn.utils import class_weight
-import numpy as np
 from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
-import pandas as pd
+from sklearn.metrics import make_scorer, fbeta_score
+
+if not os.path.exists("./data/CV_results"): os.makedirs("./data/CV_results")
 
 # =============================================================================
 #Helper function for random forest to create a dict with class weights
@@ -18,66 +24,76 @@ def constructDict(arr):
             "FloodedUrban":arr[2]}
     return dict
 # =============================================================================
-# Linear Support Vector Classifier
-def Linear_SVC(training_data):
+# Helper function to obtain x and y from a dataset
+def getXY(data):
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
-    
-    svc = LinearSVC(random_state=0, tol=1e-3)
-    svc.fit(X, y)
-    return(svc)
+    X = data[predictor_cols].values.tolist()  #X are the stats/predictor data
+    y = data['Label'].tolist() #The 3 classes
+    return X,y
 # =============================================================================
-# GaussianNaiveBayes Classifier
+# GaussianNaiveBayes Classifier (No cross validation needed)
 def GaussianNaiveBayes(training_data):
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
+    X,y = getXY(training_data)
     gnb = GaussianNB()
     gnb.fit(X, y)
     return gnb
 # =============================================================================
-# Random forest
-def RandomForest(training_data, n_estimators=100, criterion="gini",max_depth=None,min_samples_split=4):
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
+# K-nearest neighbours (Simple cross validation with different N of neighbors)
+def knn(training_data):
+    X,y = getXY(training_data)
     
-    parameters= {'class_weight': None,      #Add class weights (dict or 'balanced' or None)
-                    'criterion': 'gini',
-                    'max_depth': 15,
-                    'max_features': 0.5,
-                    'min_samples_leaf': 3}
-    rf = RandomForestClassifier(**parameters)     
-    rf.fit(X,y)
-    return rf 
-# =============================================================================
-# K-nearest neighbours
-def knn(training_data,n_neighbours=3):
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
-    knn = KNeighborsClassifier(n_neighbors=n_neighbours)
-    knn.fit(X, y)
-    print("Training finished")
-    return knn
-# =============================================================================
-# Support vector machine
-def svm(training_data,C=3, kernel="poly", degree=4):
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
+    #Define grid of parameters
+    param_grid = {'n_neighbors': [3,4,5,6,7]}
     
-    svm = SVC(C=C, kernel=kernel, degree=degree, cache_size=1024)
-    svm.fit(X, y)
-    return svm
+    #Define loss function
+    #this loss function computes the mean of precision and recall for the two
+    #labels that we are interested in
+    f2_score = make_scorer(fbeta_score, beta=2, labels=["Flooded","FloodedUrban"], average= "micro")
+    sss = StratifiedShuffleSplit(n_splits=5)
+    
+    grid = GridSearchCV(KNeighborsClassifier(),param_grid,cv=sss,verbose=1,n_jobs=-1,return_train_score=True, scoring=f2_score)
+    grid.fit(X,y) 
+    
+    results_dict = grid.cv_results_
+    results=pd.DataFrame.from_dict(results_dict)
+    best_params = grid.best_params_
+    pd.DataFrame.to_csv(results,"./data/CV_results/KNN_CV_Results.csv",mode='w+')
+    
+    knn=KNeighborsClassifier(**best_params)
+    best_model=knn.fit(X,y)
+
+    return best_model, results, best_params
+# =============================================================================
+# Support vector machine (More complex algorithm, hence more parameters for the crossvalidation)
+def svm(training_data):
+    X,y = getXY(training_data)
+    
+    #Define grid of parameters
+    param_grid = {'C':[1,1.5,2],
+                  'kernel':['linear', 'poly', 'rbf'],
+                  'degree':[2,3,4]}
+    
+    #Define loss function
+    #this loss function computes the mean of precision and recall for the two
+    #labels that we are interested in
+    f2_score = make_scorer(fbeta_score, beta=2, labels=["Flooded","FloodedUrban"], average= "micro")
+    sss = StratifiedShuffleSplit(n_splits=5)
+    
+    grid = GridSearchCV(SVC(),param_grid,cv=sss,verbose=1,n_jobs=-1,return_train_score=True, scoring=f2_score)
+    grid.fit(X,y) 
+    
+    results_dict = grid.cv_results_
+    results=pd.DataFrame.from_dict(results_dict)
+    best_params = grid.best_params_
+    pd.DataFrame.to_csv(results,"./data/CV_results/SVM_CV_Results.csv",mode='w+')
+    
+    svm=SVC(**best_params)
+    best_model=svm.fit(X,y)
+    return best_model, results, best_params
 # =============================================================================
 # Random Forest: Finding optimal parameters using a cross-validation approach
-def RandomForest_FindParams(training_data):
-    print("Finding the best parameters for Random Forest ... ")
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
-    X = training_data[predictor_cols].values.tolist()  #X are the stats/predictor data
-    y = training_data['Label'].tolist() #The 3 classes
+def RandomForest(training_data):
+    X,y = getXY(training_data)
     
     #Class weights to balance for the different amounts of pixels in each class
     class_weights = class_weight.compute_class_weight('balanced',
@@ -90,19 +106,25 @@ def RandomForest_FindParams(training_data):
     class_dict_mod = constructDict(class_weights_mod)
     class_dict_extr = constructDict(class_weights_extr)
     
+    #Define grid of parameters
     param_grid = {'min_samples_leaf':[1,3],'max_features':[0.5,'sqrt','log2'],
               'max_depth':[10,15,20],
               'class_weight':[None, 'balanced', class_dict_mod, class_dict_extr],
               'criterion':['gini']}
     
+    #Define loss function
+    #this loss function computes the mean of precision and recall for the two
+    #labels that we are interested in
+    f2_score = make_scorer(fbeta_score, beta=2, labels=["Flooded","FloodedUrban"], average= "micro")
+    
     sss = StratifiedShuffleSplit(n_splits=5)
-    grid = GridSearchCV(RandomForestClassifier(),param_grid,cv=sss,verbose=1,n_jobs=-1,return_train_score=True)
+    grid = GridSearchCV(RandomForestClassifier(),param_grid,cv=sss,verbose=1,n_jobs=-1,return_train_score=True, scoring=f2_score)
     grid.fit(X,y) 
     
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
-    pd.DataFrame.to_csv(results,"./data/RandomForestCV_Results.csv",mode='w+')
+    pd.DataFrame.to_csv(results,"./data/CV_results/RandomForestCV_Results.csv",mode='w+')
     
     rf=RandomForestClassifier(**best_params)
     best_model=rf.fit(X,y)

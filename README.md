@@ -1,11 +1,14 @@
-# README ACT project
+# README ACT project - Flood risk assessment using time series analysis
 Project for ACT module
-Jakko-Jan van Ek, Julia Sipkema, Mark Boeve, Niels Verouden & Raimon Bach Pareja
+Project members: Jakko-Jan van Ek, Julia Sipkema, Mark Boeve, Niels Verouden & Raimon Bach Pareja
+Coach: Sytze de Bruin
+Commissioner: S.M.J. Arts, Ministerie van Defensie
 
 ## Name
 Flood risk assessment using time series analysis
 
 ## Description
+#nog aanpassen met uiteindelijke executive summary
 In recent years, climate change has become an important factor for conflict. 
 Since the Dutch Ministry of Defence strives for a world of freedom and security, getting insight into flooding is highly valuable to the Ministry for proper planning of operations. 
 Therefore, the main objective of this project is to create a globally applicable time series analysis method which analyses the spatial and temporal patterns of flood prone areas. 
@@ -19,14 +22,16 @@ Besides, a simple thresholding classifications is used to create flood frequency
 The outcome of this method consists of maps displaying the frequency of flooding, as well as a workflow report of the time series analysis. 
 The team will use the MoSCoW method to assign four levels of priority to the different products defined in our project. 
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
 ## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+#hier miss een plaatje van (een van) de uitkomsten?
 
 ## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+For this project an environment was made using anaconda. This is recommended for optimal running of the project.
+If anaconda is not use, ensure that all the packages used in the project are downloaded correctly. 
+
+For the project to run optimally all the data should be downloaded and stored properly and training data should be created (for the machine learnign models). 
+For downloading the data using a script api_main.py in the folder eo_learn_API can be used. 
+For information on downloading the data manually, how to store it and how to create the training data look in the file InstructionsForPreparation.pdf.
 
 ## Usage
 Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.

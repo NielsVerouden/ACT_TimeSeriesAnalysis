@@ -4,20 +4,14 @@ import matplotlib.pyplot as plt
 from rasterio.plot import reshape_as_image
 import pandas as pd
 import matplotlib
+import numpy as np
 
-
-def diff_map (raster_stack, polarization, threshold):
-    
-    # Load raster stacks as input
-    input_folder = raster_stack
+def diff_map (input_folder, polarization, threshold):
     
     # Set the output folder
     output_location = './data/DifferenceMaps/rasters'
     
     # Create output folder if it has not been created yet
-
-    if not os.path.exists(output_location): os.mkdir(output_location)
-
     # Create the folder: './data/DifferenceMaps'
     if not os.path.exists(output_location[0:21]):
         os.mkdir(output_location[0:21])
@@ -26,12 +20,10 @@ def diff_map (raster_stack, polarization, threshold):
     if not os.path.exists(output_location):
         os.mkdir(output_location)
 
-        
+     
     # List the files in the directory
     list_files = os.listdir(input_folder)
     
-    # Create a list of the files
-    list_files = os.listdir(input_folder)
     
     # Get the dates of all the input files
     ## This is needed later for naming the files
@@ -108,7 +100,6 @@ def diff_map (raster_stack, polarization, threshold):
             dst.write_band(1,diff_raster.astype(rio.float32))
             
         
-        
     ## Create a list of all the difference maps
     list_diff_maps = os.listdir(output_location)
     
@@ -143,15 +134,13 @@ def diff_map (raster_stack, polarization, threshold):
         diff_map_freq += add_diff_map
         
         
-        
-        
     # Create output name for the difference map frequency map
     # Get the first and last date
-    first_date = min(list_dates)
-    last_date = max(list_dates)
+    first_date = str(min(list_dates))
+    last_date = str(max(list_dates))
     
     # Create the total timespan
-    tot_dates = first_date + '_' + last_date
+    tot_dates = "%s_%s" %(first_date,last_date)
     
     # Create output name
     out_name = '%sdiff_freq_map.tiff' %tot_dates
@@ -161,30 +150,22 @@ def diff_map (raster_stack, polarization, threshold):
     with rio.open(output_diff_map_freq, "w",**meta) as dst:
             dst.write_band(1,diff_map_freq.astype(rio.float32))
             
-    # Open the output again
-    freq_map = rio.open(output_diff_map_freq)
+    #Visualize the frequency map of the differences
+    output_diff_map_freq_plot = np.expand_dims(diff_map_freq, axis=2)
     
-    # Read the output
-    #freq_map_read = freq_map.read()
-    
-    # Create very simple visualization:
-    #output_diff_map_freq_plot = reshape_as_image(freq_map_read)
-    
-
-        
-
     #Define a colormap for the plotted image
-    #cmap = matplotlib.cm.get_cmap('hsv').copy()
-    #cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","yellow","gold", "orange","darkorange", "red", "darkred"])
+    cmap = matplotlib.cm.get_cmap('hsv').copy()
+    cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","yellow","gold", "orange","darkorange", "red", "darkred"])
         
-        
-    #plt.figure()
-    #c = plt.imshow(output_diff_map_freq, cmap=cmap)
-    #plt.colorbar(c)
-    #plt.suptitle(out_name)
-    #plt.show()
-            
-    return freq_map
+    #Open a new plotting device and show the image   
+    title = "Frequency of Urban Flood Events between %s and %s" %(first_date,last_date)
+    plt.figure()
+    c = plt.imshow(output_diff_map_freq_plot, cmap=cmap)
+    plt.colorbar(c)
+    plt.suptitle(title)
+    plt.show()
+
+    return 
 
 
 

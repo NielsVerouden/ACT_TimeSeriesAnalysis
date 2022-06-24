@@ -111,7 +111,7 @@ def visualizePrediction(masked_predictions_folder, input_folder):
             # may need to reduce this image size if your kernel crashes, takes a lot of memory
             img = src.read()
         
-        # Take our full image and reshape into long 2d array (nrow * ncol, nband) for classification
+        # Reshape for plotting
         reshaped_img = reshape_as_image(img)
         reshaped_prediction = reshape_as_image(prediction)
         

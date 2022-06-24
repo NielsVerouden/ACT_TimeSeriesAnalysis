@@ -8,7 +8,7 @@ import re
 def combinePrecipData(file_names, dest_name):
     ### Create one large dataframe where all rainfall data should be stored
     # Define path name of first file
-    path_name = os.path.join('data', file_names[0])
+    path_name = os.path.join('data', 'precipitation_data', file_names[0])
     
     # Create dataframe of first file
     df_total = pd.read_csv(path_name, header = 19)
@@ -19,7 +19,7 @@ def combinePrecipData(file_names, dest_name):
     ### Loop over all files in file_names and clean data
     for file_name in file_names:
         # Define path name
-        path_name = os.path.join('data', file_name)
+        path_name = os.path.join('data', 'precipitation_data', file_name)
         
         # Create dataframe of each csv file and remove first 19 rows
         df_single = pd.read_csv(path_name, header = 19)
@@ -60,7 +60,7 @@ def combinePrecipData(file_names, dest_name):
     
     ### Remove individual CSV files        
     for file_name in file_names:
-        path_name = os.path.join('data', file_name) 
+        path_name = os.path.join('data', 'precipitation_data', file_name) 
         if os.path.exists(path_name):
             os.remove(path_name)
     

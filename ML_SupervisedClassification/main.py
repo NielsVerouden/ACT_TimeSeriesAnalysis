@@ -27,7 +27,7 @@ import os
 from py.load_data_from_zip_folders import load_data
 from py.visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
 from py.load_training_data import loadTrainingData
-from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm, RandomForest_FindParams, Linear_SVC
+from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
 from py.predict import predict, getAccuracy_ConfMatrix
 from py.postprocessing import createFrequencyMap
 from py.ClipAndMask import clipRaster, maskWater
@@ -99,16 +99,13 @@ if show_sentinel_images:
 #Check load_training_data.py to check how the training folder should be structured
 trainingdata, testdata = loadTrainingData(training_folder)
 #visualizeData(X_train, y_train)
-
-#Find the best parameters for random forest using a cross validation approach
-model, results,best_params = RandomForest_FindParams(trainingdata)
-model = RandomForest(trainingdata) 
-
-# Alternative models:
-model = Linear_SVC(trainingdata)
-model = GaussianNaiveBayes(trainingdata)    
-model= knn(trainingdata)
-model = svm(trainingdata)    
+#We recommed Random Forest: Run the other lines to explore other options
+#The RF, KNN and SVM functions perform cross validation: 
+    #find the results in the folder 'CV_Results' in 'data'
+#model = GaussianNaiveBayes(trainingdata)   
+model, results, best_params = RandomForest(trainingdata) 
+#model, results, best_params= knn(trainingdata)
+#model, results, best_params = svm(trainingdata)    
     
 #Estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
@@ -118,7 +115,7 @@ test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 
 #STEP 3: Use a trained model to predict flooded pixels in each image
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
-predict(stacked_images_folder_incl_ghs, predictions_folder, model, apply_sieve = True)
+predict(stacked_images_folder_incl_ghs, predictions_folder, model, apply_sieve = True, sieze_size=25)
 # =============================================================================
 #Now mask the water bodies from each prediction
 #First load local subsets of the water dataset, then use these to mask permanent water from the predictions
@@ -142,7 +139,7 @@ frequencymaps= createFrequencyMap(masked_predictions_folder, output_folder)
 ## Create different maps of all consecutive sentinel-1 images
 ## The function uses the stacks created in STEP 1
 ## The polarization which is wanted to create difference map from has to be entered as well:
-### Options are: 'vv', 'vh', and 'ratio'. If another string is entered, the 'vv' will be runned.
+### Options are: 'vv', 'vh', and 'ratio'. If another string is entered, the 'vv' will be used.
 ## The threshold needs to be entered: everything above this threshold will be 1
 ## the remaining will be 0. This will visualise only the high backscatter
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
@@ -150,7 +147,6 @@ diff_freq_map = diff_map(stacked_images_folder_incl_ghs, 'vv', 0.5)
 
 # Misschien nog een frequency map van maken???????????????????????????????????????
 # Misschien stacken??????????????????????????????????????????????
-
 
 
 

@@ -10,6 +10,14 @@ from sklearn import tree
 import numpy as np
 import pandas as pd
 def show_histograms(folder):
+    """
+    Parameters
+    ----------
+    folder : String
+    -------
+    Plots histograms of the images located in folder
+    -------
+    """
     filenames = os.listdir(folder)
     filenames_sorted = sorted(filenames)
     
@@ -32,6 +40,14 @@ def show_histograms(folder):
                 #optional: add code to save histograms in a folder
 
 def show_backscatter(folder):
+    """
+    Parameters
+    ----------
+    folder : String
+    -------
+    Plots files located in folder
+    -------
+    """
     filenames = os.listdir(folder)
     filenames_sorted = sorted(filenames)
     # Function to normalize bands into 0.0 - 1.0 scale
@@ -73,7 +89,7 @@ def visualizePrediction(masked_predictions_folder, input_folder):
     masked_predictions_folder : String
     input_folder : String
     -------
-    Plots flood predictions alongside input images
+    Plots files from masked_predictions_folder alongside images from input_folder
     -------
     """
     for filename in os.listdir(masked_predictions_folder):

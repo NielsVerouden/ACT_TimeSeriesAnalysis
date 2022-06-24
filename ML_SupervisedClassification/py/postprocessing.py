@@ -7,14 +7,23 @@ from rasterio.plot import reshape_as_image
 from matplotlib import pyplot as plt
 import matplotlib
 import os
-import subprocess
-import numpy as np
-from rasterio.features import sieve, shapes
+
 
 
 # =============================================================================
 
 def createFrequencyMap(masked_predictions_folder, output_folder):
+    """
+    Parameters
+    ----------
+    masked_predictions_folder: str: folder containing predictions
+    output_folder: str: folder where the predictions will be located
+    -------
+    Calaculates frequency of flooding for each pixel in the images from masked_predictions_folder.
+    Each image must have the same extent.
+    Each image must have: 0 for dry, 1 for flooded land, 2 for flooded urban, 100 for permanent water.
+    -------
+    """
     if not os.path.exists(output_folder): os.makedirs(output_folder)
    
     for filename in os.listdir(masked_predictions_folder):

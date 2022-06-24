@@ -1,20 +1,27 @@
-#Predict flood/dry/flooded urban based on a model
-
-
 import rasterio as rio
 import numpy as np
-from rasterio.plot import reshape_as_raster, reshape_as_image
-from sklearn.metrics import accuracy_score, confusion_matrix, mean_squared_error, mean_absolute_percentage_error, r2_score, mean_absolute_error
+from rasterio.plot import  reshape_as_image
+from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.metrics import ConfusionMatrixDisplay
 import os
-from scipy.ndimage.filters import generic_filter
-import numpy as np
-from scipy.stats import mode
 import pandas as pd
 from matplotlib import pyplot as plt
-from rasterio.features import sieve, shapes
+from rasterio.features import sieve
 
-def predict(images_folder, predictions_folder, model, apply_sieve=True, sieze_size=13):
+def predict(images_folder, predictions_folder, model, apply_sieve=True, sieve_size=13):
+    """
+    Parameters
+    ----------
+    images_folder: str: folder containing input stacks with 5 bands
+    predictions_folder: str: folder where the predictions will be located
+    model : an estimator object of sklearn 
+    apply_sieve: Boolean: Indicates whether to apply sieving
+    sieve_size: Size of the sieze filter (higher is more aggresive)
+    -------
+    Predicts the states of each pixel in each image in images_folder as flooded, flooded urban or dry.
+    All outputs are stored in predictions_folder
+    -------
+    """
     if not os.path.exists(predictions_folder): os.makedirs(predictions_folder)
     input_files = os.listdir(images_folder)
     for file in input_files:
@@ -64,7 +71,7 @@ def predict(images_folder, predictions_folder, model, apply_sieve=True, sieze_si
                     prediction = src.read(1)
 
                 # Sieve out features x pixels or smaller.
-                sieved = sieve(prediction, sieze_size, out=np.zeros(src.shape, src.dtypes[0]))
+                sieved = sieve(prediction, sieve_size, out=np.zeros(src.shape, src.dtypes[0]))
 
                 # Write out the sieved raster.
                 kwargs = src.meta
@@ -76,6 +83,17 @@ def predict(images_folder, predictions_folder, model, apply_sieve=True, sieze_si
       
 
 def getAccuracy_ConfMatrix(model,test_data):
+    """
+    Parameters
+    ----------
+    model : an estimator object of sklearn 
+    test_data: a pd.DataFrame object containing X and y variables
+    -------
+    Plots a confusion matrix of the model.
+    Prints a dataframe with user's and producer's accuracy.
+    Return overall accuracy, a dataframe with user's and producer's accuracy and a cm.
+    -------
+    """
     predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
     #Load X and y data
     Xtest = test_data[predictor_cols].values.tolist()

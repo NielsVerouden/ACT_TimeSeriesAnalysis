@@ -1,6 +1,3 @@
-#############
-## LOAD IMAGES FROM ZIP FILE
-############
 from scipy.ndimage.filters import uniform_filter
 from scipy.ndimage.measurements import variance
 import os
@@ -8,8 +5,6 @@ from zipfile import ZipFile
 import glob
 import rasterio as rio
 import numpy as np
-from numpy import linalg
-from sklearn.preprocessing import normalize
 
 def lee_filter(img, size):
     #Applies a speckle filter with a specified size to an input array
@@ -24,9 +19,22 @@ def lee_filter(img, size):
     return img_output
 
 def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
-#input_name =  folder containing multiple zip folders
-# dest_name =  destination folder of files from zip folders
-# stack_dest_name = destination folder of stacks of vv and vh bands with vv/vh ratio
+    """
+    Parameters
+    ----------
+    input_name: str: folder containing multiple zip folders
+    dest_name: str: folder where the unzipped rasters will be located
+    stack_dest_name: str: folder where stacks of vv and vh bands with vv/vh index will be located
+    lee (opt): Boolean: indicated whether to apply the Lee speckle filter to each image (default=True)
+    size (opt): int: size used by the Lee filter (default=5) 
+    -------
+    Loads the Sentinel images from the zip folder.
+    Also creates stacks of the images of the same date, 
+    containing a vv band, vh band and a vv/vh indx band.
+    For information on how to download data: refer to TimeSeriesFloodAnalysis_Instructions.pdf
+    -------
+    """
+
     if not os.path.exists(dest_name): os.makedirs(dest_name)
     if not os.path.exists(stack_dest_name): os.makedirs(stack_dest_name)
 
@@ -45,11 +53,11 @@ def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
                 if date not in dates: dates.append(date) #append date to the list of unique dates
                 info = zipinfo.filename[-79:]
                 zipinfo.filename = date + '_' + info
-                #image_names.append(zipinfo.filename)
+
                 #extract image to destination folder
                 zip_ref.extract( zipinfo, dest_name)
             zip_ref.close() # close file
-            #os.remove(file_name) # delete zipped file    
+  
 
     #Now load the files with rasterio and stack the vv and vh files of the same dates together 
     # with the calculated vv/vh ratio
@@ -86,22 +94,10 @@ def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
         vv_data /= np.amax(vv_data)
         vh_data /= np.amax(vh_data)
         
-              #Calculate ratio as third band:
-        #np.seterr(divide='ignore', invalid='ignore')
-        #vvvh_ratio = np.empty(vh_data.shape, dtype=rio.float32)
-       # check = np.logical_or ( vv_data > 0, vh_data > 0 )
-        
-        #VV/VH ratio is calculated as VV/VH, since our data is measured in digital numbers
-        #If the data is measured in decibels, it would have to be VV-VH
-        # Division by zero returns a zero due to the where statement
-                    #vvvh_ratio = np.where ( check,  (vv_data/vh_data), -999 )
-       # vvvh_ratio = np.divide(vv_data, vh_data, out=np.zeros_like(vv_data), where=vh_data!=0)
+        #Calculate an index that highlights water bodies as third band:
         vvvh_sum = np.add(vv_data,vh_data)
         vvvh_dif = np.subtract(vv_data,vh_data)
         vvvh_index = np.divide(vvvh_dif,vvvh_sum,out=np.zeros_like(vvvh_sum), where=vvvh_sum!=0)
-        # Replace outliers of the data by the median
-       # vvvh_ratio=np.where(vvvh_ratio>5,np.median(vvvh_ratio),vvvh_ratio)
-        #vvvh_ratio_rescaled = np.interp(vvvh_ratio, (vvvh_ratio.min(), vvvh_ratio.max()), (np.amin(vh_data), np.amax(vh_data)))
 
         #Update meta to fit three layers
         meta.update(count=3,dtype=rio.float32)
@@ -113,35 +109,6 @@ def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
             dst.write_band(2,vh_data)
             dst.write_band(3,vvvh_index)
             dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
-    """
-    print(vv_data[0:10])
-    print("\n")
-    print(vh_data[0:10])
-    print("\n")
-    print(vvvh_index[0:10])
-    print("\n")
-    """
     return
 
 #credit for function lee_filter: https://stackoverflow.com/questions/39785970/speckle-lee-filter-in-python
-"""
-redundant:
-path=os.path.join(stacked_images_folder_incl_ghs,"2021-04-05_Stack_vv_vh_vvvh_ghs_dem.tiff")
-src=rio.open(path,"r")
-vv=src.read(1)
-vh=src.read(2)
-ratio=src.read(3)
-
-u = np.median(ratio)
-s = np.std(ratio)
-f1 = u - 2*s
-f2 = u + 0.5
-
-new_ratio = np.where(ratio>f2, ratio, np.median(ratio))
-
-new_ratio_rescaled = np.interp(new_ratio, (new_ratio.min(), f2), (np.amin(vh), np.amax(vh)))
-print(np.histogram(new_ratio_rescaled))
-
-audio = ratio/(u)
-image *= (255.0/image.max())
-"""

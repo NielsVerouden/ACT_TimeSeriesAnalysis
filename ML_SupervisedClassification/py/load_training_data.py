@@ -16,17 +16,25 @@
 import geopandas as gpd
 import numpy as np
 import os
-from shapely.geometry import mapping
 import rasterio as rio
-from rasterio.mask import mask
-from sklearn.model_selection import train_test_split
 import pandas as pd
 from rasterstats import zonal_stats
 
 
 #Function to load data from training folder
 #Which returns two dataframes that can be used for training
-def loadTrainingData(training_folder, test_size=0.7):
+def loadTrainingData(training_folder, train_size=0.7):
+    """
+    Parameters
+    ----------
+    training_folder: str: folder containing training data
+    train_size (opt): float: value indicating the amount of data to use for training (0-1)
+    -------
+    Loads the mean values of the Sentinel images in the training polygons
+    and returns a dataset with training and one with test data.
+    For information on how to manage the training_folder: refer to TimeSeriesFloodAnalysis_Instructions.pdf
+    -------
+    """
     #Retrieve all folders in the training_folder
     trainingDates = os.listdir(training_folder)
     dataframes = []
@@ -64,7 +72,7 @@ def loadTrainingData(training_folder, test_size=0.7):
     #['Shape_Leng','Shape_Area','Class','Label','geometry','mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
         
     #Split data into train and test (https://stackoverflow.com/questions/24147278/how-do-i-create-test-and-train-samples-from-one-dataframe-with-pandas)
-    msk = np.random.rand(len(df)) < test_size
+    msk = np.random.rand(len(df)) < train_size
     train = df[msk]
     test = df[~msk]
     return (train, test)

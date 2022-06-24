@@ -1,7 +1,7 @@
-## Get extent of tiff file 
-## Can be used if you want to add more  data from EO Browser
+## Get extent of tiff file .
+## Can be used if you want to add more  data from EO Browser.
 ## The geojson file that is exported to output_path can be used in EO browser
-##   as the extent when downloading new files, to ensure that they have the same extent
+##   as the extent when downloading new files, to ensure that they have the same extent.
 
 
 import rasterio as rio

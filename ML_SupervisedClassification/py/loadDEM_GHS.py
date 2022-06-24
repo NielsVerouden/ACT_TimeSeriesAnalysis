@@ -1,13 +1,24 @@
-### Add DEM and GHS to the raster stacks
 import os
 from zipfile import ZipFile
-import glob
 import rasterio as rio
 from py.ClipAndMask import clipRaster
 from skimage.transform import resize
 import numpy as np
 
 def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
+    """
+    Parameters
+    ----------
+    sentinel_folder: str: folder containing input stacks with 3 bands
+    output_folder: str: folder where the final stacks will be located
+    GHSfolder : str: folder where the GHS zip file can be found and where
+                    clips of the GHS will be located
+    DEMfolder : str: folder where the DEM raster can be found and where
+                    clips of the DEM will be located
+    -------
+    Stacks GHS and DEM data to the Sentinel images from sentinel_folder
+    -------
+    """
     if not os.path.exists(output_folder): os.makedirs(output_folder)
     #sentinel_folder should already contain stacks of vv, vh and vv/vh ratio
     #the function will add GHS population data and a DEM to the stack

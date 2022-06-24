@@ -64,13 +64,11 @@ output_folder = "./data/FloodingFrequencyRasters"
 #DEM_folder="./data/DEM_Chad"
 
 # =============================================================================
-## Water data can be downloaded as tiff files from: Global Surface Water - Data Access
-## (European Commission’s Joint Research Centre, 2022). https://global-surface-water.appspot.com/download 
-## DEM data can be downloaded as tiff files from: EO Browser (2022). 
-## EO Browser, Home, Explore, derived from, https://www.sentinel-hub.com/explore/eobrowser/
-## More extensive explanation of downloading and storing data is in the file "TrainingDataProcedures.docx"
+## For instructions on downloading data: refer to the file
+## TimeSeriesFloodAnalysis_Instructions.pdf
 ## BE AWARE that some tiff files are stored as '.tif' and some as '.tiff'
 # =============================================================================
+
 #Indicate whether all images and histograms need to be plotted:
 show_sentinel_histograms, show_sentinel_images = False, True
 

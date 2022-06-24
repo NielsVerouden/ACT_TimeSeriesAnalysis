@@ -33,6 +33,16 @@ def getXY(data):
 # =============================================================================
 # GaussianNaiveBayes Classifier (No cross validation needed)
 def GaussianNaiveBayes(training_data):
+    """
+    Parameters
+    ----------
+    training_data: pd.DataFrame: dataframe containing X and y variables
+    -------
+    Trains a GNB model on the dataset.
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    to predict 'Label'
+    -------
+    """
     X,y = getXY(training_data)
     gnb = GaussianNB()
     gnb.fit(X, y)
@@ -40,6 +50,19 @@ def GaussianNaiveBayes(training_data):
 # =============================================================================
 # K-nearest neighbours (Simple cross validation with different N of neighbors)
 def knn(training_data):
+    """
+    Parameters
+    ----------
+    training_data: pd.DataFrame: dataframe containing X and y variables
+    -------
+    Performs 5-fold cross-validation and a grid search with different parameter settings.
+    It returns a trained KNN model with the best parameter settings, based on the f2 score of
+    the lables "Flooded" and "FloodedUrban"
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    to predict 'Label'.
+    -------
+    """
+    
     X,y = getXY(training_data)
     
     #Define grid of parameters
@@ -66,6 +89,19 @@ def knn(training_data):
 # =============================================================================
 # Support vector machine (More complex algorithm, hence more parameters for the crossvalidation)
 def svm(training_data):
+    """
+    Parameters
+    ----------
+    training_data: pd.DataFrame: dataframe containing X and y variables
+    -------
+    Performs 5-fold cross-validation and a grid search with different parameter settings.
+    It returns a trained svm model with the best parameter settings, based on the f2 score of
+    the lables "Flooded" and "FloodedUrban"
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    to predict 'Label'.
+    -------
+    """
+    
     X,y = getXY(training_data)
     
     #Define grid of parameters
@@ -93,6 +129,18 @@ def svm(training_data):
 # =============================================================================
 # Random Forest: Finding optimal parameters using a cross-validation approach
 def RandomForest(training_data):
+    """
+    Parameters
+    ----------
+    training_data: pd.DataFrame: dataframe containing X and y variables
+    -------
+    Performs 5-fold cross-validation and a grid search with different parameter settings.
+    It returns a trained Random Forest model with the best parameter settings, based on the f2 score of
+    the lables "Flooded" and "FloodedUrban"
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    to predict 'Label'.
+    -------
+    """
     X,y = getXY(training_data)
     
     #Class weights to balance for the different amounts of pixels in each class

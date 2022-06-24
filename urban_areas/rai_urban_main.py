@@ -55,8 +55,5 @@ mean_urban_backscatter, dates = clip_sar(sar_folder, masked_urban_pol)
 
 
 
-sar = rio.open('EO/act-main-eo_learn_API/eo_learn_API/output/CapHaitien/2022-02-01_vv_vh_vvvhratio_Stack.tiff')
-sar2 = sar.read(3)
-imshow(sar2)
 
 

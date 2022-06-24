@@ -153,4 +153,3 @@ diff_freq_map = diff_map(stacked_images_folder_incl_ghs, 'vv', 0.5)
 
 
 
-

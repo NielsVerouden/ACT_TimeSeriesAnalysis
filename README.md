@@ -42,29 +42,22 @@ There are four folders with different scripts:
 - eo_learn_API
 - urban_areas
 These all contain different parts of the project. 
+The eo_learn_API contains a script to automatically download data. This should be used first. 
+The other folders contain different methods for the time series analysis and thus should be used second. 
+For more information about the different methods, their constraints and their advantages take a look at the report.  
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+## Contact information
+#moeten we nog één van ons hier aanstellen als contact persoon voor het project?
 
 ## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+#misschien hier iets wat nog verbeterd of toegevoegd kan worden?
 
 ## Authors and acknowledgment
 The five authors of this project are: Mark Boeve (manager), Julia Sipkema (controller), Jakko-Jan van Ek (secretary), Raimon Barch Pareja (team-member) and Niels Verouden (team-member). 
 
 A special thanks to Stefan, our commissioner, Sytze, our coach, and Dainius, our expert, for helping and guiding us throughout the project. 
 
-## License
-For open source projects, say how it is licensed.
-
 ## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+IThis project has been finished on 28-06-2022
 
 

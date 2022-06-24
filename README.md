@@ -9,6 +9,7 @@ Flood risk assessment using time series analysis
 
 ## Description
 #nog aanpassen met uiteindelijke executive summary
+
 In recent years, climate change has become an important factor for conflict. 
 Since the Dutch Ministry of Defence strives for a world of freedom and security, getting insight into flooding is highly valuable to the Ministry for proper planning of operations. 
 Therefore, the main objective of this project is to create a globally applicable time series analysis method which analyses the spatial and temporal patterns of flood prone areas. 
@@ -34,7 +35,13 @@ For downloading the data using a script api_main.py in the folder eo_learn_API c
 For information on downloading the data manually, how to store it and how to create the training data look in the file InstructionsForPreparation.pdf.
 
 ## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+Since the project is exploratory there are many different methods that were used and thus also many scripts. 
+There are four folders with different scripts:
+- ML_SupervisedClassification
+- Thresholding
+- eo_learn_API
+- urban_areas
+These all contain different parts of the project. 
 
 ## Support
 Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.

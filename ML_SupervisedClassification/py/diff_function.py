@@ -1,7 +1,9 @@
 import rasterio as rio
 import os
 import matplotlib.pyplot as plt
+from rasterio.plot import reshape_as_image
 import pandas as pd
+import matplotlib
 
 
 def diff_map (raster_stack, polarization, threshold):
@@ -13,7 +15,17 @@ def diff_map (raster_stack, polarization, threshold):
     output_location = './data/DifferenceMaps/rasters'
     
     # Create output folder if it has not been created yet
+<<<<<<< HEAD
     if not os.path.exists(output_location): os.mkdir(output_location)
+=======
+    # Create the folder: './data/DifferenceMaps'
+    if not os.path.exists(output_location[0:21]):
+        os.mkdir(output_location[0:21])
+        
+    # Create the folder: './data/DifferenceMaps/rasters'
+    if not os.path.exists(output_location):
+        os.mkdir(output_location)
+>>>>>>> 76b2c6a25d9c09196d70330f42af97233fe5143e
         
     # List the files in the directory
     list_files = os.listdir(input_folder)
@@ -140,13 +152,39 @@ def diff_map (raster_stack, polarization, threshold):
     
     # Create the total timespan
     tot_dates = first_date + '_' + last_date
+    
+    # Create output name
+    out_name = '%sdiff_freq_map.tiff' %tot_dates
         
-    output_diff_map_freq = os.path.join(output_location[0:21], '%sdiff_freq_map.tiff' %tot_dates)
+    output_diff_map_freq = os.path.join(output_location[0:21], out_name)
         
     with rio.open(output_diff_map_freq, "w",**meta) as dst:
             dst.write_band(1,diff_map_freq.astype(rio.float32))
             
-    return diff_map_freq
+    # Open the output again
+    freq_map = rio.open(output_diff_map_freq)
+    
+    # Read the output
+    #freq_map_read = freq_map.read()
+    
+    # Create very simple visualization:
+    #output_diff_map_freq_plot = reshape_as_image(freq_map_read)
+    
+
+        
+
+    #Define a colormap for the plotted image
+    #cmap = matplotlib.cm.get_cmap('hsv').copy()
+    #cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","yellow","gold", "orange","darkorange", "red", "darkred"])
+        
+        
+    #plt.figure()
+    #c = plt.imshow(output_diff_map_freq, cmap=cmap)
+    #plt.colorbar(c)
+    #plt.suptitle(out_name)
+    #plt.show()
+            
+    return freq_map
 
 
 

@@ -1,7 +1,7 @@
-# This script contains all functions for running the main script for urban
 # =============================================================================
-# IMPORTS
+# EXECUTE RASTER CLIPPING
 # =============================================================================
+# IMPORT PACKAGES
 import os, json,pycrs
 import numpy as np 
 import rasterio as rio
@@ -14,18 +14,34 @@ from rasterio.mask import mask
 from rasterio import plot
 from rasterio.features import shapes 
 from shapely.geometry import box, mapping 
+
 # =============================================================================
 # STEP 1: CREATE BOUNDING BOX AROUND URBAN AREA
 # =============================================================================
-
 def createBbox(coordinates, SAR_path, show_bbox='n'):
     """ 
     Function that creates bbox based on inserted coordinates
     """
-    minx, miny, maxx, maxy = coordinates
+    # Open first SAR file as rasterio object
+    path = os.path.join('data', SAR_path)
+    file = os.listdir(path)[0]
+    SAR = rio.open(os.path.join(path, file))
     
-    # Create geometry of coordinates
-    geom = box(*[minx, miny, maxx, maxy])
+    # Check if 4 points are given. If not, create geometry of SAR bounds
+    if len(coordinates) != 4:
+        print('\nExtent of the SAR images is taken!\n')
+        
+        # Get bounds of SAR image and create geometry
+        SAR_bounds = SAR.bounds
+        geom = box(*SAR_bounds)
+    
+    else:
+        print("\nExtent of bbox is taken!\n")
+        # Assign coordinates tuple to individual variables
+        minx, miny, maxx, maxy = coordinates
+        
+        # Create geometry of coordinates
+        geom = box(*[minx, miny, maxx, maxy])
     
     # Create GeoDataFrame based on geometry
     gdf = gpd.GeoDataFrame({'id': 1, 'geometry': [geom]})
@@ -35,22 +51,16 @@ def createBbox(coordinates, SAR_path, show_bbox='n'):
     gdf = gdf.to_crs('epsg:4326')
     
     if show_bbox == 'y':
-        # Open first SAR file as rasterio object
-        path = os.path.join('data', SAR_path)
-        file = os.listdir(path)[0]
-        raster = rio.open(os.path.join(path, file))
-        
-        # Plot them
-        fig, ax = plt.subplots(figsize=(5, 15))
-        rio.plot.show(raster, ax=ax)
-        gdf.plot(ax=ax, facecolor='none', edgecolor='blue')
-
+        # Plot bbox and first SAR image
+        fig, ax = plt.subplots(figsize=(10,10))
+        rio.plot.show(SAR, ax=ax)
+        gdf.plot(ax=ax, facecolor='none', edgecolor='red')    
+    
     return gdf
 
 # =============================================================================
 # STEP 2: MASK URBAN RASTER BY BBOX
 # =============================================================================
-
 def get_features(gdf):
     """
     Function to parse features from GeoDataFrame in such a manner that rasterio 
@@ -102,11 +112,9 @@ def maskUrban(urban_raster, bbox):
        
     return temp_path_masked
 
-
 # =============================================================================
 # STEP 3: CONVERT MASKED RASTER TO POLYGON
 # =============================================================================
-
 def rasterToPolygon(temp_path_masked, SAR_path, urban_grade=3):
     """ 
     Function that converts the masked urban raster to one polygon
@@ -149,7 +157,7 @@ def rasterToPolygon(temp_path_masked, SAR_path, urban_grade=3):
     gpd_urban['dissolve'] = 1
     
     # Dissolve to one polygon using the newly assigned column
-    gpd_urban = gpd_urban.dissolve(by = 'dissolve')
+    gpd_urban = gpd_urban.dissolve(by = 'raster_val')
     
     ## Remove temporary urban masked tif file    
     if os.path.exists(temp_path_masked):
@@ -160,7 +168,6 @@ def rasterToPolygon(temp_path_masked, SAR_path, urban_grade=3):
 # =============================================================================
 # STEP 4: CLIP POLYGON WITH SAR IMAGES
 # =============================================================================
-
 def clipSAR(SAR_path, urban_polygon_masked):
     """
     Function to clip the SAR data based on the polygon of the urban data. A list 
@@ -191,31 +198,33 @@ def clipSAR(SAR_path, urban_polygon_masked):
         list_of_dates.append(tif[:10])
         list_of_means.append(means)
     
-        # # Plot clipped SAR images
+        # # # Plot clipped SAR images
         # fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(15, 15))
-        # ax.imshow(SAR_clipped) 
-    
+        # ax.imshow(SAR) 
+        # plt.axis('off')
+        # plt.title(tif[0:10], fontdict={'fontsize': 30})
+        # plt.show()
+        
     return list_of_means, list_of_dates
 
 # =============================================================================
 # STEP 5: EXPORT AS CSV
 # =============================================================================
-
 def exportToCSV(mean_values, dates, SAR_path):
     """
     Function to export the mean SAR values and the corresponding dates as a CSV
     file to the output folder.
     """
     # Create output folder if it does not exist yet
-    if not os.path.exists(os.path.join('urban_areas', 'output')):
-        os.makedirs(os.path.join('urban_areas', 'output'))
+    if not os.path.exists(os.path.join('data', 'mean_VV_csv')):
+        os.makedirs(os.path.join('data', 'mean_VV_csv'))
     
     # Create dataframe of mean VV values per date
-    df_vv = pd.DataFrame({'mean_VV':mean_values, 'date':dates})
+    df_mean_vv = pd.DataFrame({'mean_VV':mean_values, 'date':dates})
 
     # Create name for csv file based on dates, and write dataframe to csv file
-    csv_name = f'meanVV_{SAR_path}_{dates[0]}_{dates[-1]}.csv'
-    csv_path = os.path.join('urban_areas', 'output', csv_name)
+    file_name = f'mean_VV_{SAR_path}_{dates[0]}_{dates[-1]}.csv'
+    path_mean_vv = os.path.join('data', 'mean_VV_csv', file_name)
     
-    df_vv.to_csv(csv_path, encoding='utf-8', index=False)
-    return df_vv
+    df_mean_vv.to_csv(path_mean_vv, encoding='utf-8', index=False)
+    return file_name, path_mean_vv

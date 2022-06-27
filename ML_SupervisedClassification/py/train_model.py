@@ -16,7 +16,7 @@ from sklearn.metrics import make_scorer, fbeta_score
 if not os.path.exists("./data/CV_results"): os.makedirs("./data/CV_results")
 # =============================================================================
 # Set random seed to ensure reproducability
-np.random.seed(123)
+np.random.seed(1)
 # =============================================================================
 #Helper function for random forest to create a dict with class weights
 def constructDict(arr):

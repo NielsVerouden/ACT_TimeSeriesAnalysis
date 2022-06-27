@@ -19,8 +19,10 @@ import os
 import rasterio as rio
 import pandas as pd
 from rasterstats import zonal_stats
-
-
+# =============================================================================
+# Set random seed to ensure reproducability
+np.random.seed(123)
+# =============================================================================
 #Function to load data from training folder
 #Which returns two dataframes that can be used for training
 def loadTrainingData(training_folder, train_size=0.7):

@@ -96,14 +96,15 @@ if show_sentinel_images:
 ##STEP 2: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
 trainingdata, testdata = loadTrainingData(training_folder)
-#visualizeData(X_train, y_train)
+visualizeData(trainingdata)
+
 #We recommed Random Forest: Run the other lines to explore other options
 #The RF, KNN and SVM functions perform cross validation: 
     #find the results in the folder 'CV_Results' in 'data'
-#model = GaussianNaiveBayes(trainingdata)   
+model = GaussianNaiveBayes(trainingdata)   
 model, results, best_params = RandomForest(trainingdata) 
-#model, results, best_params= knn(trainingdata)
-#model, results, best_params = svm(trainingdata)    
+model, results, best_params= knn(trainingdata)
+model, results, best_params = svm(trainingdata)    
     
 #Estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
@@ -113,7 +114,7 @@ test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 
 #STEP 3: Use a trained model to predict flooded pixels in each image
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
-predict(stacked_images_folder_incl_ghs, predictions_folder, model, apply_sieve = True, sieze_size=25)
+predict(stacked_images_folder_incl_ghs, predictions_folder, model, apply_sieve = True, sieve_size=25)
 # =============================================================================
 #Now mask the water bodies from each prediction
 #First load local subsets of the water dataset, then use these to mask permanent water from the predictions
@@ -129,7 +130,7 @@ maskWater(predictions_folder, waterbodies_folder, masked_predictions_folder, mas
 visualizePrediction(masked_predictions_folder, stacked_images_folder_incl_ghs)
 ## Create a flood frequency map based on the time series
 ## How often is each pixel flooded?
-frequencymaps= createFrequencyMap(masked_predictions_folder, output_folder)
+createFrequencyMap(masked_predictions_folder, output_folder)
 
 
 

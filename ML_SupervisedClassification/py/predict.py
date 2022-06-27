@@ -94,7 +94,7 @@ def getAccuracy_ConfMatrix(model,test_data):
     Return overall accuracy, a dataframe with user's and producer's accuracy and a cm.
     -------
     """
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
+    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_index','mean_Population','mean_DEM']
     #Load X and y data
     Xtest = test_data[predictor_cols].values.tolist()
     ytest = test_data['Label']

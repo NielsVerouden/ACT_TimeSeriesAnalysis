@@ -108,7 +108,7 @@ def load_data(input_name, dest_name, stack_dest_name, lee=True,size=5):
             dst.write_band(1,vv_data)
             dst.write_band(2,vh_data)
             dst.write_band(3,vvvh_index)
-            dst.descriptions = tuple(['VV','VH','VV/VH_ratio'])
+            dst.descriptions = tuple(['VV','VH','VV/VH_index'])
     return
 
 #credit for function lee_filter: https://stackoverflow.com/questions/39785970/speckle-lee-filter-in-python

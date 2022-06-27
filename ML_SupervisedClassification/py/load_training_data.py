@@ -67,6 +67,8 @@ def loadTrainingData(training_folder, train_size=0.7):
         dataframes.append(df) 
     #Now concatenate all dataframes in a single dataframe, containing all training data
     df = pd.concat(dataframes)
+    df = df.reset_index()
+    
     #We now have:
     #df.columns.tolist()
     #['Shape_Leng','Shape_Area','Class','Label','geometry','mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']

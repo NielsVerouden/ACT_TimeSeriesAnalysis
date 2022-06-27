@@ -14,7 +14,9 @@ from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 from sklearn.metrics import make_scorer, fbeta_score
 
 if not os.path.exists("./data/CV_results"): os.makedirs("./data/CV_results")
-
+# =============================================================================
+# Set random seed to ensure reproducability
+np.random.seed(123)
 # =============================================================================
 #Helper function for random forest to create a dict with class weights
 def constructDict(arr):
@@ -26,7 +28,7 @@ def constructDict(arr):
 # =============================================================================
 # Helper function to obtain x and y from a dataset
 def getXY(data):
-    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population','mean_DEM']
+    predictor_cols = ['mean_VV','mean_VH','mean_VV/VH_index','mean_Population','mean_DEM']
     X = data[predictor_cols].values.tolist()  #X are the stats/predictor data
     y = data['Label'].tolist() #The 3 classes
     return X,y

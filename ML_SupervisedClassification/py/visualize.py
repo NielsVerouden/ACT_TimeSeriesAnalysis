@@ -9,11 +9,13 @@ import os
 from sklearn import tree
 import numpy as np
 import pandas as pd
+
+# =============================================================================
 def show_histograms(folder):
     """
     Parameters
     ----------
-    folder : String
+    folder (str): location with Sentinel images
     -------
     Plots histograms of the images located in folder
     -------
@@ -38,7 +40,7 @@ def show_histograms(folder):
                 axhist.set_xlim([0,1])
                 plt.show()
                 #optional: add code to save histograms in a folder
-
+# =============================================================================
 def show_backscatter(folder):
     """
     Parameters
@@ -80,14 +82,13 @@ def show_backscatter(folder):
                 plt.imshow(stck)
                 plt.suptitle(title)
                 plt.show()
-
-######Visualize predictions:
+# =============================================================================
 def visualizePrediction(masked_predictions_folder, input_folder):
     """
     Parameters
     ----------
-    masked_predictions_folder : String
-    input_folder : String
+    masked_predictions_folder (str): folder with masked predictions
+    input_folder (str): folder with Sentinel images that were the input for the predictions
     -------
     Plots files from masked_predictions_folder alongside images from input_folder
     -------
@@ -152,11 +153,11 @@ def visualizePrediction(masked_predictions_folder, input_folder):
         fig.show()
     plt.close(fig)
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html
-    
-###Visualize a tree from a Random Forest 
+# =============================================================================    
+#Not used, but can be called to visualize how the first decision tree of
+# the random forest looks like
 def visualizeTreeFromRF(rf,data):
-    #fn=data.feature_names
-    #cn=data.target_names
+    
     plt.figure()
     fig, axes = plt.subplots(nrows = 1,ncols = 1,figsize = (4,4), dpi=800)
     tree.plot_tree(rf.estimators_[0],
@@ -166,12 +167,24 @@ def visualizeTreeFromRF(rf,data):
                   proportion=False,
                   max_depth=5);
     plt.show()
-    #fig.savefig('rf_individualtree.png')
+    #fig.savefig('./data/rf_individualtree.png')
+# =============================================================================
+def visualizeData(data):
+    """
+    Parameters:
+        data (pandas DataFrame): a dataframe where each row contains numeric values for
+        'mean_VV','mean_VH','mean_VV/VH_index','mean_Population','mean_DEM'
+         and a categoric value for 'Label'.
+    data : TYPE
 
-def visualizeData(X,y):
-    df = pd.DataFrame(columns=['VV', 'VH',"VV/VH","GHS","DEM"], data=X)
-    df['Label'] = y
+    Returns
+    -------
+    Displays a pairplot of the values, coloured by label.
+
+    """
+    subset = data[['mean_VV','mean_VH','mean_VV/VH_index','mean_Population','mean_DEM','Label']]
+ 
     plt.figure()
-    sns.pairplot(df, height=2.5, hue='Label')
+    sns.pairplot(subset, hue='Label')
     plt.show()
     return

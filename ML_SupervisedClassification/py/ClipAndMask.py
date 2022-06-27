@@ -135,7 +135,6 @@ def maskWater(predictions_folder,waterbodies_folder, dest_folder,mask_value=100)
         # Save the rasters as tif
         output_name="MaskedPrediction_%s.tiff"%date
         outputpath = os.path.join(dest_folder,output_name)
-        print(outputpath)
         with rio.open(outputpath, 'w', **raster_meta) as dst:
             dst.write(raster.astype(rio.float32))
     return 

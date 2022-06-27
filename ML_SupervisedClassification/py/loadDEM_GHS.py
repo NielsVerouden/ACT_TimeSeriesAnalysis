@@ -85,6 +85,6 @@ def addDEM_GHS(sentinel_folder, output_folder, GHSfolder, DEMfolder):
             dst.write_band(3,ratio)
             dst.write_band(4, ghs_data_resized)
             dst.write_band(5, dem_data_resized)
-            dst.descriptions = tuple(['VV','VH','VV/VH_ratio',"Population","DEM"])
+            dst.descriptions = tuple(['VV','VH','VV/VH_index',"Population","DEM"])
     return   
 

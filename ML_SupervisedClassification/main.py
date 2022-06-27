@@ -24,7 +24,7 @@
 ## present in the current working directory.
 # =============================================================================
 import os
-from py.load_data_from_zip_folders import load_data
+
 from py.visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
 from py.load_training_data import loadTrainingData
 from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
@@ -36,27 +36,28 @@ from py.diff_function import diff_map
 # =============================================================================
 # Create folders and load file names
 # These folders should exist in your wd 
-input_folder = './data/CapHaitienDownloadsFebruary2021' #Containing zip files with vv and vh Sentinel-1 data
+stacked_images_folder = './data/SentinelTimeSeriesStacked' #Created by running LoadAndStackSentinelData.py
 training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
-DEM_filename = '2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff' #Filename of DEM that includes the extents of the Sentinel-1 images
-DEM_folder = "./data/DEM_Haiti"
-DEM = os.path.join(DEM_folder,DEM_filename)
-DEM_name = "DEMCrop"
+DEM_folder = "./data/DEM_Haiti" #Containg a DEM
+waterbodies_folder = "./data/WaterBodiesHaiti" #Containing a water bodies dataset
+# These files should exist
+#Filepath to a DEM tile that includes the extents of the Sentinel-1 images
+DEM = "./data/DEM_Haiti2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
+#Filepath to a water bodies tile that includes the extents of the Sentinel-1 images
+water = "./data/WaterBodiesHaiti/occurrence_80W_20Nv1_3_2020.tiff" 
 # =============================================================================
 # These names are used later to store the files
-waterbodies_folder = "./data/WaterBodies" #Containing a water bodies dataset
+DEM_name = "DEMCrop"
 waterbodies_name = "WaterBodiesCrop"
-water = "./data/WaterBodies/occurrence_80W_20Nv1_3_2020.tiff" #Filename of raster file that includes the extents of the Sentinel-1 images
 # =============================================================================
 #These folders are created by the script:
-masked_predictions_folder = './data/FloodPredictions_masked'
-images_folder = './data/SentinelTimeSeries'
-stacked_images_folder = './data/SentinelTimeSeriesStacked'
-stacked_images_folder_incl_ghs='./data/SentinelTimeSeriesStacked_Incl_DEM_GHS'
-predictions_folder = "./data/FloodPredictions"
-masked_predictions_folder = "./data/FloodPredictionsMasked"
-output_folder = "./data/FloodingFrequencyRasters"
+    #Folders to store output files:
+if not os.path.exists("./ML_SupervisedClassification/output"): os.makedirs("./ML_SupervisedClassification/output")
+stacked_images_folder_incl_ghs='./ML_SupervisedClassification/output/SentinelTimeSeriesStacked_Incl_DEM_GHS'
+predictions_folder = "./ML_SupervisedClassification/output/FloodPredictions"
+masked_predictions_folder = './ML_SupervisedClassification/output/FloodPredictions_masked'        
+output_folder = "./ML_SupervisedClassification/output/FloodingFrequencyRasters"
 # =============================================================================
 #When creating training data:
 #input_folder="./data/ChadDownloadsNovember2020"
@@ -76,10 +77,6 @@ show_sentinel_histograms, show_sentinel_images = False, True
 
 
 ## STEP 1: Load data
-## Unzip images from the input_folder to the images_folder
-## Stack vv and vh bands, together with a vv/vh index which is calculated by the function
-load_data(input_folder, images_folder,stacked_images_folder,lee=True)
-
 #Append information from the DEM and GHS data to each raster stack
 addDEM_GHS(stacked_images_folder, stacked_images_folder_incl_ghs, ghs_folder, DEM_folder)
 
@@ -102,10 +99,10 @@ visualizeData(trainingdata)
 #The RF, KNN and SVM functions perform cross validation: 
     #find the results in the folder 'CV_Results' in 'data'
 model = GaussianNaiveBayes(trainingdata)   
-model, results, best_params = RandomForest(trainingdata) 
 model, results, best_params= knn(trainingdata)
-model, results, best_params = svm(trainingdata)    
-    
+model, results, best_params = svm(trainingdata)  
+model, results, best_params = RandomForest(trainingdata) 
+
 #Estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 
@@ -115,12 +112,12 @@ test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 #STEP 3: Use a trained model to predict flooded pixels in each image
 ## Classify each pixel of each image as flooded area, flooded urban area or dry area
 predict(stacked_images_folder_incl_ghs, predictions_folder, model, apply_sieve = True, sieve_size=25)
-# =============================================================================
+
 #Now mask the water bodies from each prediction
 #First load local subsets of the water dataset, then use these to mask permanent water from the predictions
 clipRaster(stacked_images_folder_incl_ghs, water, waterbodies_folder, waterbodies_name)
 maskWater(predictions_folder, waterbodies_folder, masked_predictions_folder, mask_value=100)
-# =============================================================================
+
 
 
 

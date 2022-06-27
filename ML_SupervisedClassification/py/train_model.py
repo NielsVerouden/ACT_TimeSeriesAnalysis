@@ -13,10 +13,12 @@ from sklearn.utils import class_weight
 from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 from sklearn.metrics import make_scorer, fbeta_score
 
-if not os.path.exists("./data/CV_results"): os.makedirs("./data/CV_results")
+if not os.path.exists("./ML_SupervisedClassification/output/GridSearch_Results"): 
+    os.makedirs("./ML_SupervisedClassification/output/GridSearch_Results")
+
 # =============================================================================
 # Set random seed to ensure reproducability
-np.random.seed(1)
+np.random.seed(123)
 # =============================================================================
 #Helper function for random forest to create a dict with class weights
 def constructDict(arr):
@@ -41,7 +43,7 @@ def GaussianNaiveBayes(training_data):
     training_data: pd.DataFrame: dataframe containing X and y variables
     -------
     Trains a GNB model on the dataset.
-    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_index','mean_Population' and 'mean_DEM'
     to predict 'Label'
     -------
     """
@@ -60,7 +62,7 @@ def knn(training_data):
     Performs 5-fold cross-validation and a grid search with different parameter settings.
     It returns a trained KNN model with the best parameter settings, based on the f2 score of
     the lables "Flooded" and "FloodedUrban"
-    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_index','mean_Population' and 'mean_DEM'
     to predict 'Label'.
     -------
     """
@@ -82,7 +84,7 @@ def knn(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
-    pd.DataFrame.to_csv(results,"./data/CV_results/KNN_CV_Results.csv",mode='w+')
+    pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/KNN_GS_Results.csv",mode='w+')
     
     knn=KNeighborsClassifier(**best_params)
     best_model=knn.fit(X,y)
@@ -99,7 +101,7 @@ def svm(training_data):
     Performs 5-fold cross-validation and a grid search with different parameter settings.
     It returns a trained svm model with the best parameter settings, based on the f2 score of
     the lables "Flooded" and "FloodedUrban"
-    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_index','mean_Population' and 'mean_DEM'
     to predict 'Label'.
     -------
     """
@@ -123,7 +125,7 @@ def svm(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
-    pd.DataFrame.to_csv(results,"./data/CV_results/SVM_CV_Results.csv",mode='w+')
+    pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/SVM_GS_Results.csv",mode='w+')
     
     svm=SVC(**best_params)
     best_model=svm.fit(X,y)
@@ -139,7 +141,7 @@ def RandomForest(training_data):
     Performs 5-fold cross-validation and a grid search with different parameter settings.
     It returns a trained Random Forest model with the best parameter settings, based on the f2 score of
     the lables "Flooded" and "FloodedUrban"
-    It uses values from 'mean_VV','mean_VH','mean_VV/VH_ratio','mean_Population' and 'mean_DEM'
+    It uses values from 'mean_VV','mean_VH','mean_VV/VH_index','mean_Population' and 'mean_DEM'
     to predict 'Label'.
     -------
     """
@@ -174,7 +176,7 @@ def RandomForest(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
-    pd.DataFrame.to_csv(results,"./data/CV_results/RandomForestCV_Results.csv",mode='w+')
+    pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/RandomForestGS_Results.csv",mode='w+')
     
     rf=RandomForestClassifier(**best_params)
     best_model=rf.fit(X,y)

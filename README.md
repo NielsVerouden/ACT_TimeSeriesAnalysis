@@ -1,4 +1,5 @@
-# README ACT project - Flood risk assessment using time series analysis
+# README 
+# ACT - Flood risk assessment using time series analysis
 Project for ACT module
 
 Project members: Jakko-Jan van Ek, Julia Sipkema, Mark Boeve, Niels Verouden & Raimon Bach Pareja

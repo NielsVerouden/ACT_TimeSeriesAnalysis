@@ -5,6 +5,7 @@ from rasterio.plot import reshape_as_image
 import pandas as pd
 import matplotlib
 import numpy as np
+import shutil
 
 def diff_map (input_folder, polarization, threshold):
     
@@ -49,7 +50,7 @@ def diff_map (input_folder, polarization, threshold):
     ## This will be done for all consecutive rasters due to the for loop
     for j in range(0, len(list_files)-1):
         
-        raster_name_1 = os.path.join(input_folder, list_files[j]) 
+        raster_name_1 = os.path.join(input_folder, list_files[0]) 
         raster_name_2 = os.path.join(input_folder, list_files[j+1]) 
         
         raster_1 = rio.open(raster_name_1)
@@ -156,14 +157,25 @@ def diff_map (input_folder, polarization, threshold):
     #Define a colormap for the plotted image
     cmap = matplotlib.cm.get_cmap('hsv').copy()
     cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", ["green","yellow","gold", "orange","darkorange", "red", "darkred"])
+    
+    # Create name for the output of the plot (png)
+    title = "Frequency of Urban Flood Events between %s and %s" %(first_date,last_date)
+    output_plot = os.path.join(output_location[0:21],title)
+    
         
     #Open a new plotting device and show the image   
-    title = "Frequency of Urban Flood Events between %s and %s" %(first_date,last_date)
     plt.figure()
     c = plt.imshow(output_diff_map_freq_plot, cmap=cmap)
     plt.colorbar(c)
     plt.suptitle(title)
+    plt.savefig(output_plot)
     plt.show()
+    
+    # Delete all different rasters to save storage
+    ## All the storage is needed to run, but by deleting all the difference maps
+    ## a lot of storage is available again for in the furutre
+    # (Un)comment the following line to (de)activate the deletion of the difference maps
+    #shutil.rmtree('./data/DifferenceMaps/rasters') 
 
     return 
 

@@ -61,9 +61,12 @@ def load_data(images_folder, stacked_images_folder, zipfiles_folder, from_zip, l
     """
     Parameters
     ----------
-    input_name: str: folder containing multiple zip folders
-    dest_name: str: folder where the unzipped rasters will be located
-    stack_dest_name: str: folder where stacks of vv and vh bands with vv/vh index will be located
+    images_folder: str: folder containing tiff files OR folder where such files
+    will be located
+    stacked_images_folder: str: folder where the stacked images will be located
+    zipfiles_folder: str: folder where the zip folders are located
+    from_zip: Boolean: indicates whether or not data has to be loaded from a zipfolder (True)
+    or that the data is already unzipped and present in images_folder
     lee (opt): Boolean: indicated whether to apply the Lee speckle filter to each image (default=True)
     size (opt): int: size used by the Lee filter (default=5) 
     -------
@@ -144,7 +147,7 @@ def load_data(images_folder, stacked_images_folder, zipfiles_folder, from_zip, l
         #Update meta to fit three layers
         meta.update(count=3,dtype=rio.float32)
                
-        stack_filename="%s_vv_vh_vvvhratio_Stack.tiff"%date
+        stack_filename="%s_vv_vh_vvvhindex_Stack.tiff"%date
         stack_filepath=os.path.join(stacked_images_folder,stack_filename)
         with rio.open(stack_filepath, "w",**meta) as dst:
             dst.write_band(1,vv_data)

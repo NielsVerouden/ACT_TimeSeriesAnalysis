@@ -10,7 +10,7 @@ import numpy as np
 
 def visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv):
     ## Create path to load precipitation csv
-    path_precip = os.path.join("data", "precipitation_data", precipitation_csv)
+    path_precip = os.path.join("data", precipitation_csv)
     
     # Find sum_days inside name of precipitation CSV file and assign it to a variable
     days = re.search('_avg(.+?)days_', precipitation_csv).group(1)
@@ -24,13 +24,20 @@ def visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv):
     ## Combine DataFrames based on data
     df_total = pd.merge(df_precip, df_vv, on ='date')
     
+    # Define name for titles
+    count = SAR_path.count('/')
+    if count != 0:
+        title_name = re.search('/(.+)', SAR_path).group(count)
+    else:
+        title_name = SAR_path
+
     
     ##### LINEPLOT MEAN_VV AND AVERAGE PRECIPITATION
     ## Set parameters for the lineplot
-    fig, ax = plt.subplots(figsize=(25, 5))
+    fig, ax = plt.subplots(figsize=(20, 5))
     plt.xticks(np.arange(0, len(df_total), (len(df_total)*0.015)))
     [lab.set_rotation(90) for lab in ax.get_xticklabels()]
-    plt.title(f'Mean VV backscatter and average precipitation in urban area ({SAR_path})', 
+    plt.title(f'Mean VV backscatter and average precipitation in urban area ({title_name})', 
               fontdict={'fontsize': 20})
     ax.set_xlabel('date', fontdict={'fontsize': 15})
     
@@ -54,10 +61,10 @@ def visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv):
     
     ##### LINEPLOT MEAN_VV AND SUM xDAYS PRECIPITATION
     ## Set parameters for the lineplot
-    fig, ax = plt.subplots(figsize=(25, 5))
+    fig, ax = plt.subplots(figsize=(20, 5))
     plt.xticks(np.arange(0, len(df_total), (len(df_total)*0.015)))
     [lab.set_rotation(90) for lab in ax.get_xticklabels()]
-    plt.title(f'Mean VV backscatter and {days}-day sum of precipitation in urban area ({SAR_path})', 
+    plt.title(f'Mean VV backscatter and {days}-day sum of precipitation in urban area ({title_name})', 
               fontdict={'fontsize': 20})
     ax.set_xlabel('date', fontdict={'fontsize': 15})
     
@@ -80,9 +87,6 @@ def visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv):
     plt.show()
 
 
-    return df_total, days, mean_VV, sum_xdays
-
-
-
+    return df_total, days, mean_VV, sum_xdays, title_name
 
 

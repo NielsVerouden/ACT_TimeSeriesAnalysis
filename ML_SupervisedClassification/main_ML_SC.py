@@ -25,27 +25,29 @@
 # =============================================================================
 import os
 
-from py.visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
-from py.load_training_data import loadTrainingData
-from py.train_model import GaussianNaiveBayes, RandomForest, knn, svm
-from py.predict import predict, getAccuracy_ConfMatrix
-from py.postprocessing import createFrequencyMap
+from py.Visualize import show_backscatter, show_histograms, visualizePrediction, visualizeData
+from py.LoadTrainingData import loadTrainingData
+from py.TrainModel import GaussianNaiveBayes, RandomForest, knn, svm
+from py.Predict import predict, getAccuracy_ConfMatrix
+from py.CreateFrequencyMaps import createFrequencyMap
 from py.ClipAndMask import clipRaster, maskWater
-from py.loadDEM_GHS import addDEM_GHS
+from py.LoadDEM_GHSoadDEM_GHS import addDEM_GHS
 from py.diff_function import diff_map
 # =============================================================================
 # Create folders and load file names
 # These folders should exist in your wd 
 stacked_images_folder = './data/SentinelTimeSeriesStacked' #Created by running LoadAndStackSentinelData.py
-training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
-ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
-DEM_folder = "./data/DEM_Haiti" #Containg a DEM
-waterbodies_folder = "./data/WaterBodiesHaiti" #Containing a water bodies dataset
+training_folder = "./data/TrainingDataChad" #Containing training data (check load_training_data for procedures)
+ghs_folder = "./data/GHS_Chad" #Containing a zipfile which has a tile of the GHS dataset
+DEM_folder = "./data/DEM_Chad" #Containg a DEM
+waterbodies_folder = "./data/WaterBodiesChad" #Clips of the waterbodies dataset will be stored here
 # These files should exist
 #Filepath to a DEM tile that includes the extents of the Sentinel-1 images
-DEM = "./data/DEM_Haiti2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
+DEM = "./data/DEM_Haiti/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
+DEM = "./data/DEM_Chad/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
 #Filepath to a water bodies tile that includes the extents of the Sentinel-1 images
 water = "./data/WaterBodiesHaiti/occurrence_80W_20Nv1_3_2020.tiff" 
+water = "./data/WaterBodiesChad/occurrence_10E_20Nv1_3_2020.tif"
 # =============================================================================
 # These names are used later to store the files
 DEM_name = "DEMCrop"

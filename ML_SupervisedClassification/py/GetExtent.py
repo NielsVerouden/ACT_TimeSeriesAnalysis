@@ -26,10 +26,10 @@ def getExtent(filepath, output_path):
         
     
 #The following is an example:
-inputpath=os.path.join('./data/SentinelTimeSeriesStacked_Incl_DEM_GHS', #folder
-                       '2021-01-01_Stack_vv_vh_vvvh_ghs_dem.tiff')      #filename
+inputpath=os.path.join('./data/TrainingDataChad/2020_11_02', #folder
+                       'TrainingSentinel_2020_11_02.tiff')      #filename
 
-outputpath=os.path.join('./data/CapHaitienDownloadsFebruary2021',       #folder
+outputpath=os.path.join('./data/TrainingDataChad/2020_11_02',       #folder
                         'bounds.geojson')                               #filename
 
 getExtent(inputpath,outputpath)

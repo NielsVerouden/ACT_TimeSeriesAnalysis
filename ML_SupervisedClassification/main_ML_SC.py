@@ -32,7 +32,7 @@ from ML_SupervisedClassification.py.Predict import predict, getAccuracy_ConfMatr
 from ML_SupervisedClassification.py.CreateFrequencyMaps import createFrequencyMap
 from ML_SupervisedClassification.py.ClipAndMask import clipRaster, maskWater
 from ML_SupervisedClassification.py.LoadDEM_GHS import addDEM_GHS
-from ML_SupervisedClassification.py.diff_function import diff_map
+from ML_SupervisedClassification.py.DifferenceFunction import diff_map
 # =============================================================================
 # Create folders and load file names
 # These folders should exist in your wd 

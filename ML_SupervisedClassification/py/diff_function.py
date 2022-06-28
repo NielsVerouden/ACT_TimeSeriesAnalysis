@@ -60,7 +60,9 @@ def diff_map (input_folder, polarization, threshold):
         pol = 0
         print('Only, "vv", "vh", and "ratio" are correct parameters for the polarization. Now the vv has been chosen, if another polarization is wanted please ruen the function again with the correct parameter.') 
     
-    # Substract rasters from each other
+    # Substract rasters from the first raster
+    ## It is also possible to substract every image from the image before that image,
+    ## then the 0 has to be changed to a j
     ## This will be done for all consecutive rasters due to the for loop
     for j in range(0, len(list_files)-1):
         

@@ -9,6 +9,20 @@ import shutil
 
 def diff_map (input_folder, polarization, threshold):
     
+    # Create a function which will be used later
+    # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
+    ## Create a function to do it
+    ## Only the parts that have big difference will be shown
+    ## This threshold can be changed, it is now set at 30000
+    def diff_city (diff_raster):
+        for i in range(0, len(diff_raster)):
+            for j in range(0, len(diff_raster[0])):
+                if diff_raster[i][j] > threshold_val:
+                    diff_raster[i][j] = 1
+                else:
+                    diff_raster[i][j] = 0
+        return(diff_raster)
+    
     # Set the output folder
     output_location = './data/DifferenceMaps/rasters'
     
@@ -67,19 +81,6 @@ def diff_map (input_folder, polarization, threshold):
         
         # Create the threshold value from the percentage
         threshold_val = threshold * max_pixel
-                
-        # Get only 1 and 0 values to distuingish flooded and non-flooded cities better
-        ## Create a function to do it
-        ## Only the parts that have big difference will be shown
-        ## This threshold can be changed, it is now set at 30000
-        def diff_city (diff_raster):
-            for i in range(0, len(diff_raster)):
-                for j in range(0, len(diff_raster[0])):
-                    if diff_raster[i][j] > threshold_val:
-                        diff_raster[i][j] = 1
-                    else:
-                        diff_raster[i][j] = 0
-            return(diff_raster)
         
         # Call the function
         diff_raster = diff_city(diff_raster)

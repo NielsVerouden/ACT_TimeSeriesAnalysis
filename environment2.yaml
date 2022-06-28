@@ -1,0 +1,9 @@
+name: floodMapping
+channels:
+- conda-forge
+dependencies:
+- rasterio
+- folium 
+- pycrs
+- rasterstats
+

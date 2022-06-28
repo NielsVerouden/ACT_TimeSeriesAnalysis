@@ -13,8 +13,6 @@ from sklearn.utils import class_weight
 from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 from sklearn.metrics import make_scorer, fbeta_score
 
-if not os.path.exists("./ML_SupervisedClassification/output/GridSearch_Results"): 
-    os.makedirs("./ML_SupervisedClassification/output/GridSearch_Results")
 
 # =============================================================================
 # Set random seed to ensure reproducability
@@ -84,6 +82,9 @@ def knn(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
+    
+    if not os.path.exists("./ML_SupervisedClassification/output/GridSearch_Results"): 
+        os.makedirs("./ML_SupervisedClassification/output/GridSearch_Results")
     pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/KNN_GS_Results.csv",mode='w+')
     
     knn=KNeighborsClassifier(**best_params)
@@ -125,6 +126,9 @@ def svm(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
+    
+    if not os.path.exists("./ML_SupervisedClassification/output/GridSearch_Results"): 
+        os.makedirs("./ML_SupervisedClassification/output/GridSearch_Results")
     pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/SVM_GS_Results.csv",mode='w+')
     
     svm=SVC(**best_params)
@@ -176,6 +180,9 @@ def RandomForest(training_data):
     results_dict = grid.cv_results_
     results=pd.DataFrame.from_dict(results_dict)
     best_params = grid.best_params_
+    
+    if not os.path.exists("./ML_SupervisedClassification/output/GridSearch_Results"): 
+        os.makedirs("./ML_SupervisedClassification/output/GridSearch_Results")
     pd.DataFrame.to_csv(results,"./ML_SupervisedClassification/output/GridSearch_Results/RandomForestGS_Results.csv",mode='w+')
     
     rf=RandomForestClassifier(**best_params)

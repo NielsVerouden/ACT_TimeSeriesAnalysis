@@ -1,0 +1,14 @@
+name: floodMapping
+dependencies:
+- python
+- numpy
+- matplotlib 
+- pandas
+- geopandas
+- shapely
+- fiona 
+- scikit-learn
+- scikit-image
+- scipy 
+- seaborn 
+

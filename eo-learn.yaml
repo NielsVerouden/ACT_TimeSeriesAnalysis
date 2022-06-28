@@ -1,0 +1,4 @@
+name: floodMapping
+dependencies:
+- pip:
+  - eo-learn 

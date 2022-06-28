@@ -13,7 +13,7 @@ import os
 # CHECK OUTLIERS
 # =============================================================================
 # METHOD 1: VISUALLY CHECK OUTLIERS
-def visualOutlierDetection(SAR_path, df_total, days, mean_VV, sum_xdays):
+def visualOutlierDetection(title_name, df_total, days, mean_VV, sum_xdays):
     ## Create copy of dataframe and keep only relevant columns for plotting
     df_plot = df_total.copy()
     df_plot = df_plot[[mean_VV, sum_xdays]]
@@ -26,24 +26,41 @@ def visualOutlierDetection(SAR_path, df_total, days, mean_VV, sum_xdays):
     ax2 = sns.histplot(data=df_plot, x=sum_xdays, kde=True, color="skyblue", ax=ax2)
     ax2.set_title(f'Histogram of sum {days}-days precipitation (in mm)', 
                   fontdict={'fontsize': 15})
+    plt.tight_layout()
+    plt.savefig(f"./urban_areas/output/Histogram_{title_name}.png", dpi=300)
     plt.show()
     
     ## METHOD 2: BOXPLOT
-    sns.set(rc = {'figure.figsize':(15,8)})
-    plt.title(f'Boxplot of mean VV and sum {days}-days precipitation (in mm) ({SAR_path})', 
+    sns.set(rc = {'figure.figsize':(15,8)})    
+    plt.title(f'Boxplot of mean VV ({title_name})', 
               fontdict={'fontsize': 15})
-    sns.boxplot(data=df_plot, orient="h", palette="Set1")
-    sns.swarmplot(data=df_plot, orient="h", color=".25", size=5)
-    # sns.reset_orig()
+    sns.boxplot(data=df_plot[mean_VV], orient="h", color="Red")
+    sns.swarmplot(data=df_plot[mean_VV], orient="h", color=".25", size=5)
+    
+    plt.tight_layout()
+    plt.savefig(f"./urban_areas/output/Boxplot{mean_VV}_{title_name}.png", dpi=300)
+    plt.show()
+    
+    sns.set(rc = {'figure.figsize':(15,8)})    
+    plt.title(f'Boxplot of sum {days}-days precipitation (in mm) ({title_name})', 
+              fontdict={'fontsize': 15})
+    sns.boxplot(data=df_plot[sum_xdays], orient="h", color='Blue')
+    sns.swarmplot(data=df_plot[sum_xdays], orient="h", color=".25", size=5)
+    
+    plt.tight_layout()
+    plt.savefig(f"./urban_areas/output/Boxplot{sum_xdays}_{title_name}.png", dpi=300)
     plt.show()
     
     ## METHOD 3: SCATTERPLOT
     sns.set(rc = {'figure.figsize':(15, 8)})
-    plt.title(f'Scatterplot with sum {days}-days precipitation (in mm) (y-ax) and mean VV (x-ax) ({SAR_path})', 
+    plt.title(f'Scatterplot with sum {days}-days precipitation (in mm) (y-ax) and mean VV (x-ax) ({title_name})', 
               fontdict={'fontsize': 15})
     sns.scatterplot(data=df_plot, x=sum_xdays, y=mean_VV)
-    plt.show()
     
+    plt.tight_layout()
+    plt.savefig(f"./urban_areas/output/Scatterplot_{title_name}.png", dpi=300)
+    plt.show()
+
     return
 
 # METHOD 2: STATISTICALLY CHECK OUTLIERS
@@ -265,23 +282,22 @@ def mad_method(df, variable_name, threshold=3):
 # =============================================================================
 # VISUALISE AND EXPORT OUTLIERS
 # =============================================================================
-def visualiseStatisticalOutliers(SAR_path, df_outlier, LR_columns, mean_VV, sum_xdays, days):  
+def visualiseStatisticalOutliers(title_name, df_outlier, LR_columns, mean_VV, sum_xdays, days):  
     # Get list of indices of both variables (which will be used to marker the outliers)
     indexLR_vv = df_outlier.loc[df_outlier[LR_columns[0]] != 0].index.to_list()
     indexLR_precip = df_outlier.loc[df_outlier[LR_columns[1]] != 0].index.to_list()
     
     ##### VISUALISE RESULTS - SCATTERPLOT 
     variables = [mean_VV, sum_xdays]
-    for idx in range(len(variables)):
-        variable = variables[idx]       
-        sns.set(rc = {'figure.figsize':(15, 8)})
-        plt.title(f'Scatterplot with outlier Likelihood Ratio (LR) for {variable} ({SAR_path})', 
-                  fontdict={'fontsize': 15})
+    for idx in range(len(variables)):  
+        sns.set(rc = {'figure.figsize':(6,6)})
         sns.scatterplot(data=df_outlier, x=sum_xdays, y=mean_VV, 
                         hue=LR_columns[idx],
                         style=LR_columns[idx],
                         palette="deep")
-        plt.legend(loc='upper left')
+        plt.legend(loc='upper right')
+        plt.tight_layout()
+        plt.savefig(f"./urban_areas/output/outliers{variables[idx]}_Scatterplot_{title_name}.png", dpi=300)
         plt.show()
 
     ##### VISUALISE RESULTS - LINEPLOT 
@@ -289,7 +305,7 @@ def visualiseStatisticalOutliers(SAR_path, df_outlier, LR_columns, mean_VV, sum_
     fig, ax = plt.subplots(figsize=(25, 5))
     plt.xticks(np.arange(0, len(df_outlier), (len(df_outlier)*0.015)))
     [lab.set_rotation(90) for lab in ax.get_xticklabels()]
-    plt.title(f'Mean VV backscatter and {days}-day sum of precipitation in urban area ({SAR_path})', 
+    plt.title(f'Mean VV backscatter and {days}-day sum of precipitation in urban area ({title_name})', 
               fontdict={'fontsize': 20})
     ax.set_xlabel('date', fontdict={'fontsize': 15})
     
@@ -323,19 +339,21 @@ def visualiseStatisticalOutliers(SAR_path, df_outlier, LR_columns, mean_VV, sum_
     ax2.set_ylabel(f"{days}-day sum precipitation", fontdict={'fontsize': 15})
     
     ## Plot final result
-    plt.show()    
+    plt.tight_layout()
+    plt.savefig(f"./urban_areas/output/outliers_Lineplot_{title_name}.png", dpi=300)
+    plt.show()
     
-def exportOutlierDetection(df_outlier, SAR_path):
+def exportOutlierDetection(df_outlier, title_name):
     # Create directory
     dest_path = os.path.join('urban_areas', 'output', 'outlierDetection')
     if not os.path.exists(dest_path):
         os.makedirs(dest_path)
     
     ## Write DataFrame with outliers to output folder
-    csv_path = os.path.join(dest_path, f'outliers_{SAR_path}.csv')
+    csv_path = os.path.join(dest_path, f'outliers_{title_name}.csv')
     
     df_outlier.to_csv(csv_path, encoding='utf-8', index=False)
     
-    print(f'\nThe data can be found in:\n"{csv_path}"')
+    print(f'\nThe outlier table can be found in:\n"{csv_path}"')
     
     return

@@ -16,12 +16,12 @@
     ## Julia Sipkema
     ## Niels Verouden
     
-## Please make sure that your current working directory contains a folder that 
-## corresponds to the title of the variable input_folder.
-## This folder should contain several zip folders: each zip folder should contain 
-## a VV and VH Sentinel-1 image downloaded from sentinel hub.
-## The images_folder is automatically created by the script if it is not yet 
-## present in the current working directory.
+## Please make sure that your current working directory is set to the parent
+## directory of the project files,
+## such that the variable stacked_images_folder refers to a valid path and a folder
+## containing stacks of the Sentinel-1 images.
+## These stacks os VV, VH and VV/VH-index are created by first running the script
+## LoadAndStackSentinelData.py in the parent directory.
 # =============================================================================
 import os
 
@@ -38,16 +38,16 @@ from ML_SupervisedClassification.py.DifferenceFunction import diff_map
 # These folders should exist in your wd 
 stacked_images_folder = './data/SentinelTimeSeriesStacked' #Created by running LoadAndStackSentinelData.py
 training_folder = "./data/TrainingDataChad" #Containing training data (check load_training_data for procedures)
-ghs_folder = "./data/GHS_Chad" #Containing a zipfile which has a tile of the GHS dataset
-DEM_folder = "./data/DEM_Chad" #Containg a DEM
-waterbodies_folder = "./data/WaterBodiesChad" #Clips of the waterbodies dataset will be stored here
+ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
+DEM_folder = "./data/DEM_Haiti" #Containg a DEM
+waterbodies_folder = "./data/WaterBodiesHaiti" #Clips of the waterbodies dataset will be stored here
 # These files should exist
 #Filepath to a DEM tile that includes the extents of the Sentinel-1 images
 DEM = "./data/DEM_Haiti/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
-DEM = "./data/DEM_Chad/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
+#DEM = "./data/DEM_Chad/2022-06-16-00_00_2022-06-16-23_59_DEM_COPERNICUS_30__Grayscale.tiff"
 #Filepath to a water bodies tile that includes the extents of the Sentinel-1 images
 water = "./data/WaterBodiesHaiti/occurrence_80W_20Nv1_3_2020.tiff" 
-water = "./data/WaterBodiesChad/occurrence_10E_20Nv1_3_2020.tif"
+#water = "./data/WaterBodiesChad/occurrence_10E_20Nv1_3_2020.tif"
 # =============================================================================
 # These names are used later to store the files
 DEM_name = "DEMCrop"
@@ -62,13 +62,12 @@ masked_predictions_folder = './ML_SupervisedClassification/output/FloodPredictio
 output_folder = "./ML_SupervisedClassification/output/FloodingFrequencyRasters"
 # =============================================================================
 #When creating training data:
-#input_folder="./data/ChadDownloadsNovember2020"
-#ghs_folder="./data/GHS_Chad"
-#DEM_folder="./data/DEM_Chad"
-
+## Only run addDEM_GHS on a folder with a stack of vv, vh, and vv/vh-index
+## and store the output image (which has five bands) in a training data folder
+## See the file InstructionsForPreparations for instructions !
 # =============================================================================
-## For instructions on downloading data: refer to the file
-## TimeSeriesFloodAnalysis_Instructions.pdf
+## Also consult the file InstructionsForPreparations for instructions 
+## to see how to download data
 ## BE AWARE that some tiff files are stored as '.tif' and some as '.tiff'
 # =============================================================================
 
@@ -95,17 +94,19 @@ if show_sentinel_images:
 ##STEP 2: Load training data and train a supervised classification model
 #Check load_training_data.py to check how the training folder should be structured
 trainingdata, testdata = loadTrainingData(training_folder)
+#Create pairplot of training data
 visualizeData(trainingdata)
 
-#We recommed Random Forest: Run the other lines to explore other options
+#We recommed k-Nearest Neighbours: Run the other lines to explore other options
 #The RF, KNN and SVM functions perform cross validation: 
     #find the results in the folder 'CV_Results' in 'data'
-model = GaussianNaiveBayes(trainingdata)   
+#model = GaussianNaiveBayes(trainingdata)   
 model, results, best_params= knn(trainingdata)
-model, results, best_params = svm(trainingdata)  
-model, results, best_params = RandomForest(trainingdata) 
+#model, results, best_params = svm(trainingdata)  
+#model, results, best_params = RandomForest(trainingdata) 
 
-#Estimate test accuracy. A confusion matrix is shown to visualize the errors of the model
+#Estimate test accuracy, user's accuracies and producer's accuracies.
+#A confusion matrix is shown to visualize the errors of the model
 test_acc, accuracies, cm = getAccuracy_ConfMatrix(model,testdata)
 
 
@@ -143,8 +144,7 @@ createFrequencyMap(masked_predictions_folder, output_folder)
 ## All the data will be stored in a folder which will be created called "DifferenceMaps"
 diff_map(stacked_images_folder_incl_ghs, 'vv', 0.5)
 
-# Misschien nog een frequency map van maken???????????????????????????????????????
-# Misschien stacken??????????????????????????????????????????????
+
 
 
 

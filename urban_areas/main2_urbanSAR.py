@@ -79,18 +79,18 @@ from urban_areas.py.s23OutlierDetection import exportOutlierDetection
 # =============================================================================
 # PARAMETERS FOR RASTER CLIPPING
 # Make 'coordinates' an empty tuple to take SAR image as extent 
-SAR_path = 'ValkenburgMar2021Sep2021'
-urban_raster = 'GHS_built_globe/GHS_BUILT_LDSMT_GLOBE_R2018A_NETHERLANDS.tif' 
-coordinates = (5.812265,50.853351,5.851490,50.879097)
+SAR_path = 'LesCayes_Jul2021Aug2021'
+urban_raster = 'GHS_built_globe/GHS_BUILT_LDSMT_GLOBE_R2018A_HAITI.tif' 
+coordinates = (-73.872070,18.137460,-73.687363,18.301259)
 built_lowerbound = 3
 
-# Show boundingbox in map? (y/n)
+# Show boundingbox in map? (y/n) (not exported to output)
 show_bbox = 'y'
 
 # =============================================================================
 # PARAMETERS FOR VISUALISATION
 # Add file name of the precipitation data that should be linked to the mean vv (including '.CSV')
-precipitation_csv = 'daily_precipitation_avg14days_ValkenburgMar2021Dec2021.CSV'
+precipitation_csv = 'precipitation_data/daily_precipitation_avg14days_LesCayes_Jul2021Aug2021.CSV'
 
 # =============================================================================
 # EXECUTE RASTER CLIPPING
@@ -114,17 +114,17 @@ file_name, path_mean_vv = exportToCSV(mean_values, dates, SAR_path)
 # VISUALISE RESULTS AND OUTLIER DETECTION
 # =============================================================================
 # STEP 1: LINEPLOTS OF MEAN VV BACKSCATTER, AVG PRECIPITATION, AND SUM PRECIPITATION
-df_total, days, mean_VV, sum_xdays = visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv)
+df_total, days, mean_VV, sum_xdays, title_name = visualiseData(SAR_path, precipitation_csv, file_name, path_mean_vv)
 
 # STEP 2: VISUAL OUTLIER DETECTION
-visualOutlierDetection(SAR_path, df_total, days, mean_VV, sum_xdays)
+visualOutlierDetection(title_name, df_total, days, mean_VV, sum_xdays)
 
 # STEP 3: STATISTICAL OUTLIER DETECTION
 df_outlier, LR_columns = statisticalOutlierDetection(df_total, mean_VV, sum_xdays)
-visualiseStatisticalOutliers(SAR_path, df_outlier, LR_columns, mean_VV, sum_xdays, days)
+visualiseStatisticalOutliers(title_name, df_outlier, LR_columns, mean_VV, sum_xdays, days)
 
 # STEP 4: EXPORT OUTLIER DETECTION DF
-exportOutlierDetection(df_outlier, SAR_path)
+exportOutlierDetection(df_outlier, title_name)
 
 
 print(f"----- {round((time.time() - start_time), 2)} seconds -----")

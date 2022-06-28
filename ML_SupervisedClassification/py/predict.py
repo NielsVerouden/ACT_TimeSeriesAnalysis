@@ -7,7 +7,7 @@ import os
 import pandas as pd
 from matplotlib import pyplot as plt
 from rasterio.features import sieve
-
+ 
 def predict(images_folder, predictions_folder, model, apply_sieve=True, sieve_size=13):
     """
     Parameters

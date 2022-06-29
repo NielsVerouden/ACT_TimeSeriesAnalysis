@@ -37,7 +37,7 @@ from ML_SupervisedClassification.py.DifferenceFunction import diff_map
 # Create folders and load file names
 # These folders should exist in your wd 
 stacked_images_folder = './data/SentinelTimeSeriesStacked' #Created by running LoadAndStackSentinelData.py
-training_folder = "./data/TrainingDataChad" #Containing training data (check load_training_data for procedures)
+training_folder = "./data/TrainingDataHaiti" #Containing training data (check load_training_data for procedures)
 ghs_folder = "./data/GHS_Haiti" #Containing a zipfile which has a tile of the GHS dataset
 DEM_folder = "./data/DEM_Haiti" #Containg a DEM
 waterbodies_folder = "./data/WaterBodiesHaiti" #Clips of the waterbodies dataset will be stored here

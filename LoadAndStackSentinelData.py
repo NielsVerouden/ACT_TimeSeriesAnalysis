@@ -20,7 +20,7 @@ files_are_zipped = True #or False
 
 if files_are_zipped:
     # the zip-folders with VV and VH .tiff files can be found in this folder (change name):
-    zipfolder = "./data/ChadDownloadsNovember2020"
+    zipfolder = "./data/CapHaitienDownloadsFebruary2021"
     # The extracted files will go to:
     images_folder = "./data/SentinelTimeSeries"
     # The stacks consisting of VV, VH and VV/VH index will go to:

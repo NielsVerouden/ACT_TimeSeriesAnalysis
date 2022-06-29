@@ -1,7 +1,7 @@
 import os
 from zipfile import ZipFile
 import rasterio as rio
-from py.ClipAndMask import clipRaster
+from ML_SupervisedClassification.py.ClipAndMask import clipRaster
 from skimage.transform import resize
 import numpy as np
 

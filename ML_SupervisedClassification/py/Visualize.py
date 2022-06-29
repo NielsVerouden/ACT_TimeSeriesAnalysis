@@ -150,6 +150,12 @@ def visualizePrediction(masked_predictions_folder, input_folder):
         
         axs[1].imshow(reshaped_prediction, cmap=cmap, interpolation='none')
         fig.suptitle(date)
+        
+        # remove the x and y ticks
+        for ax in axs:
+            ax.set_xticks([])
+            ax.set_yticks([])
+        fig.savefig("./ML_SupervisedClassification/output/maps/FloodPrediction_%s.png"%date)
         fig.show()
     plt.close(fig)
     #credit: http://patrickgray.me/open-geo-tutorial/chapter_5_classification.html

@@ -69,7 +69,7 @@ def visualiseCoordinates(coordinates, grid, start, end, visualise, SAR_path):
         gdf = gpd.GeoDataFrame(geometry=points, crs=4326)
         
         # Define path to open the first SAR image
-        path = os.path.join('data', 'SAR_data', SAR_path)
+        path = os.path.join('data', SAR_path)
         files = os.listdir(path)
         file_path = os.path.join(path, files[0])
         

@@ -9,6 +9,7 @@ import pandas as pd
 import geopandas as gpd 
 import rioxarray as rxr 
 import geopandas
+import re
 import matplotlib.pyplot as plt
 from rasterio.mask import mask
 from rasterio import plot
@@ -52,7 +53,7 @@ def createBbox(coordinates, SAR_path, show_bbox='n'):
     
     if show_bbox == 'y':
         # Plot bbox and first SAR image
-        fig, ax = plt.subplots(figsize=(10,10))
+        fig, ax = plt.subplots(figsize=(5,5))
         rio.plot.show(SAR, ax=ax)
         gdf.plot(ax=ax, facecolor='none', edgecolor='red')    
     
@@ -200,9 +201,9 @@ def clipSAR(SAR_path, urban_polygon_masked):
     
         # # # Plot clipped SAR images
         # fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(15, 15))
-        # ax.imshow(SAR) 
+        # ax.imshow(SAR_clipped) 
         # plt.axis('off')
-        # plt.title(tif[0:10], fontdict={'fontsize': 30})
+        # plt.title(f'VV backscatter urban areas ({tif[0:10]})', fontdict={'fontsize': 30})
         # plt.show()
         
     return list_of_means, list_of_dates
@@ -223,8 +224,17 @@ def exportToCSV(mean_values, dates, SAR_path):
     df_mean_vv = pd.DataFrame({'mean_VV':mean_values, 'date':dates})
 
     # Create name for csv file based on dates, and write dataframe to csv file
-    file_name = f'mean_VV_{SAR_path}_{dates[0]}_{dates[-1]}.csv'
+    count = SAR_path.count('/')
+    if count != 0:
+        name = re.search('/(.+)', SAR_path).group(count)
+    else:
+        name = SAR_path
+    
+    file_name = f'mean_VV_{name}_{dates[0]}_{dates[-1]}.csv'
     path_mean_vv = os.path.join('data', 'mean_VV_csv', file_name)
     
-    df_mean_vv.to_csv(path_mean_vv, encoding='utf-8', index=False)
+    if not os.path.exists(path_mean_vv):
+        df_mean_vv.to_csv(path_mean_vv, encoding='utf-8', index=False)
+    else:
+        print(f"\nThe following file already exists: \n{file_name}")
     return file_name, path_mean_vv

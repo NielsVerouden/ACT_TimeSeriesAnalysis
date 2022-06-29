@@ -55,16 +55,16 @@ from urban_areas.py.s13CalculatePrecipSum import calculatePrecipSum
 # =============================================================================
 # DEFINE INPUT PARAMETERS
 # =============================================================================
-start = '2021-01-01'
-end = '2021-07-31'
-coordinates = (-72.304390,19.668729,-72.112816,19.805822)
-dest_name = "CapHaitien_Jan2021Jul2021"
-grid = 3
+start = '2021-07-01'
+end = '2021-08-31'
+coordinates = (-73.872070,18.137460,-73.687363,18.301259)
+dest_name = "LesCayes_Jul2021Aug2021"
+grid = 5
 sum_days = 14
 
 # Visualise coordinates (y/n)? If so, define SAR_path
 visualise = "y"
-SAR_path = 'CapHaitien_Jan2021Jul2021'
+SAR_path = 'LesCayes_Jul2021Aug2021'
 
 # =============================================================================
 # EXECUTE STEPS

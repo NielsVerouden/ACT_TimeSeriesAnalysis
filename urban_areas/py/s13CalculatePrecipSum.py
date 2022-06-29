@@ -46,6 +46,6 @@ def calculatePrecipSum(dest_name, df_total, sum_days):
     csv_path = os.path.join('data', 'precipitation_data', f'daily_precipitation_avg{sum_days}days_{dest_name}.csv')
     df_total.to_csv(csv_path, encoding='utf-8', index=False)
     
-    print(f'\nThe data can be found in:\n"{csv_path}"')
+    print(f'\nThe data can be found in:\n"{csv_path}')
     
     return df_total, csv_path
